@@ -14,7 +14,7 @@ const Social = () => {
     whatsapp: '',
   });
   const [loading, setLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [hasSavedLinks, setHasSavedLinks] = useState(false);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const Social = () => {
       };
       setFormData(savedLinks);
       setHasSavedLinks(Boolean(Object.values(savedLinks).some((value) => value && value.toString().trim())));
-      setIsEditing(false);
+      setShowModal(false);
     }
   }, [business]);
 
@@ -41,7 +41,7 @@ const Social = () => {
       if (!result.success) throw new Error(result.message || 'Failed to save');
       toast.success('Social links saved successfully!');
       setHasSavedLinks(Boolean(Object.values(formData).some((value) => value && value.toString().trim())));
-      setIsEditing(false);
+      setShowModal(false);
       await refreshBusiness();
     } catch (err) {
       const message = err.response?.data?.message || err.message || 'Failed to save social links';
@@ -52,7 +52,7 @@ const Social = () => {
   };
 
   const handleEditClick = () => {
-    setIsEditing(true);
+    setShowModal(true);
   };
 
   const socialFields = [
@@ -70,7 +70,7 @@ const Social = () => {
         <p className="text-gray-600">Connect your social media accounts</p>
       </div>
 
-      {hasSavedLinks && !isEditing && (
+      {hasSavedLinks && (
         <div className="bg-white rounded-xl shadow-sm p-6 border border-indigo-100">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
@@ -105,61 +105,89 @@ const Social = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {socialFields.map((field) => {
-            const Icon = field.icon;
-            return (
-              <div key={field.key}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{field.label}</label>
-                <div className="relative">
-                  <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type={field.key === 'whatsapp' ? 'tel' : 'url'}
-                    value={formData[field.key]}
-                    onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                    placeholder={field.placeholder}
-                    disabled={!isEditing && hasSavedLinks}
-                  />
-                </div>
-              </div>
-            );
-          })}
-
-          <div className="flex items-center gap-3 flex-wrap">
-            {hasSavedLinks && !isEditing ? (
-              <button
-                type="button"
-                onClick={handleEditClick}
-                className="flex items-center gap-2 px-6 py-3 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition"
-              >
-                <FaSave />
-                Edit Links
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-              >
-                <FaSave />
-                {loading ? 'Saving...' : hasSavedLinks ? 'Update Links' : 'Save Links'}
-              </button>
-            )}
-
-            {hasSavedLinks && isEditing && (
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-3 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
-              >
-                Cancel
-              </button>
-            )}
+      {!hasSavedLinks && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">No social links added yet</p>
+            <button
+              type="button"
+              onClick={handleEditClick}
+              className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition mx-auto"
+            >
+              <FaSave />
+              Add Social Links
+            </button>
           </div>
-        </form>
-      </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200"
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl animate-in slide-in-from-bottom-4 zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">
+                    {hasSavedLinks ? 'Edit Social Links' : 'Add Social Links'}
+                  </h3>
+                  <p className="text-sm text-gray-600">Connect your social media accounts</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {socialFields.map((field) => {
+                const Icon = field.icon;
+                return (
+                  <div key={field.key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{field.label}</label>
+                    <div className="relative">
+                      <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type={field.key === 'whatsapp' ? 'tel' : 'url'}
+                        value={formData[field.key]}
+                        onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                        placeholder={field.placeholder}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div className="flex items-center gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-3 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  <FaSave />
+                  {loading ? 'Saving...' : hasSavedLinks ? 'Update Links' : 'Save Links'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

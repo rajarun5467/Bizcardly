@@ -1,53 +1,92 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { FaUpload, FaSave, FaBuilding, FaPhone, FaEnvelope, FaGlobe, FaMapMarkerAlt, FaEdit, FaTimes } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
+import {
+  FaBuilding, FaEdit, FaEnvelope, FaGlobe, FaImage, FaMapMarkerAlt,
+  FaPhone, FaRegTrashAlt, FaSave, FaUpload, FaWhatsapp
+} from 'react-icons/fa';
+
+const inputClass =
+  'w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm outline-none transition hover:border-[#b9b4ff] focus:border-[#6657f1] focus:ring-4 focus:ring-[#6657f1]/10';
+
+const iconInputClass =
+  'w-full rounded-lg border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition hover:border-[#b9b4ff] focus:border-[#6657f1] focus:ring-4 focus:ring-[#6657f1]/10';
+
+const cardClass =
+  'rounded-xl bg-white p-5 shadow-[0_12px_28px_rgba(40,51,92,0.08)] ring-1 ring-slate-200/80';
+
+const MapPreview = () => null;
 
 const Profile = () => {
   const { business, refreshBusiness } = useAuth();
-  const [isEditMode, setIsEditMode] = useState(!business);
+  const [editingSection, setEditingSection] = useState(null); // 'business-info', 'contact-info', 'address-info', or null
+  const [showModal, setShowModal] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     tagline: '',
     description: '',
     phone: '',
+    whatsapp: '',
     email: '',
     website: '',
     address: '',
     logo: null,
+    profileImage: null,
   });
   const [logoPreview, setLogoPreview] = useState('');
+  const [profilePreview, setProfilePreview] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (business) {
       setFormData({
-        name: business.name || '',
+        name: business.name || business.businessName || '',
         tagline: business.tagline || '',
-        description: business.description || '',
+        description: business.description || business.about || '',
         phone: business.phone || '',
+        whatsapp: business.whatsapp || business.socialLinks?.whatsapp || '',
         email: business.email || '',
-        website: business.website || '',
+        website: business.website || business.socialLinks?.website || '',
         address: business.address || '',
         logo: null,
+        profileImage: null,
       });
-      if (business.logo) {
-        setLogoPreview(business.logo);
+      setLogoPreview(business.logo || '');
+      setProfilePreview(business.profileImage || '');
+      if (!hasInitialized) {
+        setEditingSection(null);
+        setHasInitialized(true);
       }
     }
-  }, [business]);
+  }, [business, hasInitialized]);
 
-  const handleImageChange = (e) => {
+  const updateField = (name, value) => {
+    setFormData((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleImageChange = (field, setPreview) => (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData({ ...formData, logo: file });
-      setLogoPreview(URL.createObjectURL(file));
+      updateField(field, file);
+      setPreview(URL.createObjectURL(file));
     }
+  };
+
+  const handleRemoveImage = (field, setPreview) => {
+    updateField(field, null);
+    setPreview('');
+  };
+
+  const openEditForm = (section) => {
+    setEditingSection(section);
+    setShowModal(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       const token = localStorage.getItem('bizcardly_token');
       if (!token) {
@@ -55,44 +94,43 @@ const Profile = () => {
       }
 
       const data = new FormData();
-      
-      // Add text fields
       data.append('name', formData.name || '');
+      data.append('businessName', formData.name || '');
       data.append('tagline', formData.tagline || '');
       data.append('description', formData.description || '');
+      data.append('about', formData.description || '');
       data.append('phone', formData.phone || '');
+      data.append('whatsapp', formData.whatsapp || '');
       data.append('email', formData.email || '');
       data.append('website', formData.website || '');
       data.append('address', formData.address || '');
-      
-      // Only add logo if it's a new file (File object)
+
       if (formData.logo && formData.logo instanceof File) {
         data.append('logo', formData.logo);
       }
 
-      console.log('Submitting profile data...', {
-        method: business ? 'PUT' : 'POST',
-        token: token ? 'Present' : 'Missing',
-      });
+      if (formData.profileImage && formData.profileImage instanceof File) {
+        data.append('profileImage', formData.profileImage);
+      }
 
       const res = await fetch('http://localhost:5000/api/business', {
         method: business ? 'PUT' : 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: data,
       });
 
       const result = await res.json();
-      console.log('Response:', result, 'Status:', res.status);
-      
       if (!res.ok) {
         throw new Error(result.message || `Failed to save profile (${res.status})`);
       }
-      
-      toast.success('Profile saved successfully!');
+
+      toast.success('Business profile saved!');
       await refreshBusiness();
-      setIsEditMode(false);
+      setEditingSection(null);
+      setShowModal(false);
+      setHasInitialized(true);
     } catch (err) {
       console.error('Profile save error:', err);
       toast.error(err.message || 'Failed to save profile');
@@ -101,270 +139,496 @@ const Profile = () => {
     }
   };
 
-  // VIEW MODE - Display saved data
-  if (!isEditMode && business) {
+  if (!business) {
     return (
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between animate-slide-in-left">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Business Profile</h2>
-            <p className="text-gray-600">Your business information</p>
+      <div className="space-y-5 animate-fade-in">
+        <div className={cardClass}>
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f0efff] text-[#6657f1]">
+              <FaBuilding />
+            </div>
+            <h2 className="text-lg font-black text-[#11142f]">Business Profile</h2>
           </div>
-          <button
-            onClick={() => setIsEditMode(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition hover-lift shadow-lg"
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">No business profile created yet</p>
+            <button
+              type="button"
+              onClick={() => openEditForm('business-info')}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#6657f1] to-[#5546dc] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6657f1]/25 transition hover:-translate-y-0.5"
+            >
+              <FaEdit />
+              Create Business Profile
+            </button>
+          </div>
+        </div>
+
+        {/* Edit Modal */}
+        {showModal && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200"
+            onClick={() => { setShowModal(false); setEditingSection(null); }}
           >
-            <FaEdit />
-            Edit Profile
-          </button>
-        </div>
+            <div 
+              className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl animate-in slide-in-from-bottom-4 zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-gray-800">Create Business Profile</h3>
+                  <button
+                    type="button"
+                    onClick={() => { setShowModal(false); setEditingSection(null); }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                </div>
 
-        {/* Logo & Name Card */}
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl shadow-md p-8 animate-slide-in-up hover:shadow-lg transition">
-          <div className="flex items-center gap-6">
-            <div className="w-32 h-32 rounded-xl bg-white flex items-center justify-center overflow-hidden border-2 border-indigo-200 shadow-md">
-              {logoPreview ? (
-                <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
-              ) : (
-                <FaBuilding className="text-gray-300 text-4xl" />
-              )}
-            </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-800 mb-1">{business.name || 'Business Name'}</h1>
-              <p className="text-lg text-indigo-600 font-semibold mb-2">{business.tagline || 'Add a tagline'}</p>
-              <p className="text-gray-600">{business.slug}</p>
-            </div>
-          </div>
-        </div>
+                <div className="grid gap-5 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Business Name <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => updateField('name', e.target.value)}
+                      className={inputClass}
+                      placeholder="Raj Tech Solutions"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Tagline <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.tagline}
+                      onChange={(e) => updateField('tagline', e.target.value)}
+                      className={inputClass}
+                      placeholder="Smart Technology, Better Business."
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-slate-700">Description <span className="text-red-500">*</span></label>
+                  <textarea
+                    required
+                    maxLength={500}
+                    rows={4}
+                    value={formData.description}
+                    onChange={(e) => updateField('description', e.target.value)}
+                    className={`${inputClass} resize-none leading-6`}
+                    placeholder="Describe your business..."
+                  />
+                  <p className="mt-1 text-right text-xs font-medium text-slate-500">{formData.description.length} / 500</p>
+                </div>
 
-        {/* Description Card */}
-        {business.description && (
-          <div className="bg-white rounded-xl shadow-md p-6 animate-staggered hover:shadow-lg transition">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">About</h3>
-            <p className="text-gray-600 leading-relaxed">{business.description}</p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setShowModal(false); setEditingSection(null); }}
+                    className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#6657f1] to-[#5546dc] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6657f1]/25 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <FaSave />
+                    {loading ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
-
-        {/* Contact Information Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-staggered">
-          {business.phone && (
-            <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition group">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
-                  <FaPhone className="text-indigo-600" />
-                </div>
-                <h4 className="font-semibold text-gray-800">Phone</h4>
-              </div>
-              <p className="text-gray-600 ml-13">{business.phone}</p>
-            </div>
-          )}
-
-          {business.email && (
-            <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition group">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
-                  <FaEnvelope className="text-green-600" />
-                </div>
-                <h4 className="font-semibold text-gray-800">Email</h4>
-              </div>
-              <p className="text-gray-600 ml-13 break-all">{business.email}</p>
-            </div>
-          )}
-
-          {business.website && (
-            <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition group">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
-                  <FaGlobe className="text-blue-600" />
-                </div>
-                <h4 className="font-semibold text-gray-800">Website</h4>
-              </div>
-              <a href={business.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 ml-13 break-all">
-                {business.website}
-              </a>
-            </div>
-          )}
-
-          {business.address && (
-            <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition group">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
-                  <FaMapMarkerAlt className="text-red-600" />
-                </div>
-                <h4 className="font-semibold text-gray-800">Address</h4>
-              </div>
-              <p className="text-gray-600 ml-13">{business.address}</p>
-            </div>
-          )}
-        </div>
       </div>
     );
   }
 
-  // EDIT MODE - Show form
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between animate-slide-in-left">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Edit Business Profile</h2>
-          <p className="text-gray-600">Update your business information</p>
+    <div className="space-y-4 animate-fade-in sm:space-y-5">
+      <section className={`${cardClass} overflow-hidden`}>
+        <div className="mb-4 flex items-center gap-3 sm:mb-5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f0efff] text-[#6657f1]">
+            <FaImage />
+          </div>
+          <h2 className="text-base font-black text-[#11142f] sm:text-lg">Business Information</h2>
         </div>
-        <button
-          onClick={() => setIsEditMode(false)}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition hover-lift"
-        >
-          <FaTimes />
-          Cancel
-        </button>
-      </div>
 
-      <div className="bg-white rounded-xl shadow-md p-6 animate-slide-in-up">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Logo Upload */}
-          <div className="flex items-center gap-6">
-            <div className="w-32 h-32 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 hover:border-indigo-400 transition group">
-              {logoPreview ? (
-                <img src={logoPreview} alt="Logo" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-              ) : (
-                <FaBuilding className="text-gray-400 text-4xl group-hover:text-indigo-400 transition" />
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Business Logo</label>
-              <label className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg cursor-pointer hover:bg-indigo-700 transition hover-lift shadow-lg">
-                <FaUpload />
-                <span>Upload Logo</span>
-                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-              </label>
+        <div className="mb-5 grid gap-4 sm:mb-6 sm:gap-5 lg:grid-cols-2">
+          <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-[#f8fbff] to-white p-3 sm:p-4">
+            <p className="mb-3 text-sm font-bold text-slate-700">Logo</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 sm:h-32 sm:w-32">
+                {business.logo ? (
+                  <img src={business.logo} alt="Logo" className="h-full w-full object-contain p-2" />
+                ) : (
+                  <FaBuilding className="text-3xl text-slate-300 sm:text-4xl" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-black text-[#11142f]">Business Logo</p>
+                <p className="mt-1 text-xs font-medium text-slate-500">Shown on your digital card</p>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-staggered">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Business Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition hover:border-gray-400"
-                placeholder="Your Business Name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tagline</label>
-              <input
-                type="text"
-                name="tagline"
-                value={formData.tagline}
-                onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition hover:border-gray-400"
-                placeholder="Your tagline"
-              />
+          <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-[#f8f7ff] to-white p-3 sm:p-4">
+            <p className="mb-3 text-sm font-bold text-slate-700">Profile Image</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8e4ff] ring-1 ring-[#d6d1ff] sm:h-48 sm:w-48">
+                {business.profileImage ? (
+                  <img src={business.profileImage} alt="Profile" className="h-full w-full object-cover" />
+                ) : (
+                  <FaBuilding className="text-4xl text-[#6657f1]/45 sm:text-5xl" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-black text-[#11142f] break-words">{business.name || business.businessName || 'Business Owner'}</p>
+                <p className="mt-1 text-xs font-medium text-slate-500">Public profile photo</p>
+              </div>
             </div>
           </div>
+        </div>
 
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none transition hover:border-gray-400"
-              placeholder="Tell customers about your business..."
-            />
+            <p className="mb-2 text-sm font-bold text-slate-700">Business Name</p>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 sm:px-4">{business.name || business.businessName || '-'}</div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-staggered">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-              <div className="relative group">
-                <FaPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition" />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition hover:border-gray-400"
-                  placeholder="+91 98765 43210"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <div className="relative group">
-                <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition hover:border-gray-400"
-                  placeholder="contact@business.com"
-                />
-              </div>
-            </div>
+          <div>
+            <p className="mb-2 text-sm font-bold text-slate-700">Tagline</p>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 sm:px-4">{business.tagline || '-'}</div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-staggered">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
-              <div className="relative group">
-                <FaGlobe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition" />
-                <input
-                  type="url"
-                  name="website"
-                  value={formData.website}
-                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition hover:border-gray-400"
-                  placeholder="https://yourwebsite.com"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-              <div className="relative group">
-                <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition" />
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition hover:border-gray-400"
-                  placeholder="123 Main Street, City"
-                />
-              </div>
-            </div>
+        <div className="mt-5">
+          <p className="mb-2 text-sm font-bold text-slate-700">Description</p>
+          <div className="min-h-[100px] rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-medium leading-6 text-slate-700 sm:min-h-[120px] sm:px-4">
+            {business.description || business.about || '-'}
           </div>
-
-          <div className="flex gap-3 pt-4">
+          <div className="mt-4 flex justify-end">
             <button
               type="button"
-              onClick={() => setIsEditMode(false)}
-              className="flex-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition hover-lift"
+              onClick={() => openEditForm('business-info')}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#6657f1] to-[#5546dc] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-[#6657f1]/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#6657f1]/40 active:scale-95 sm:w-auto"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 hover-lift shadow-lg hover:shadow-xl"
-            >
-              <FaSave />
-              {loading ? (
-                <>
-                  <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-                  Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
+              <FaEdit />
+              Edit
             </button>
           </div>
-        </form>
+        </div>
+      </section>
+
+      <div className="grid gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-2">
+        <section className={cardClass}>
+          <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f0efff] text-[#6657f1]">
+                <FaPhone />
+              </div>
+              <h2 className="text-base font-black text-[#11142f] sm:text-lg">Contact Information</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => openEditForm('contact-info')}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#bdb7ff] bg-white px-5 py-3 text-sm font-bold text-[#6657f1] shadow-md transition-all duration-200 hover:bg-[#f6f4ff] hover:border-[#6657f1] hover:shadow-lg active:scale-95 sm:w-auto"
+            >
+              <FaEdit />
+              Edit
+            </button>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+            <div>
+              <p className="mb-2 text-sm font-bold text-slate-700">Phone</p>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 sm:px-4">{business.phone || '-'}</div>
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-bold text-slate-700">WhatsApp</p>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 sm:px-4">{business.whatsapp || business.socialLinks?.whatsapp || '-'}</div>
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-bold text-slate-700">Email</p>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 sm:px-4 break-all">{business.email || '-'}</div>
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-bold text-slate-700">Website</p>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 sm:px-4">
+                {business.website || business.socialLinks?.website ? (
+                  <a href={business.website || business.socialLinks?.website} target="_blank" rel="noopener noreferrer" className="break-all text-[#6657f1]">
+                    {business.website || business.socialLinks?.website}
+                  </a>
+                ) : (
+                  '-'
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className={cardClass}>
+          <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f0efff] text-[#6657f1]">
+                <FaMapMarkerAlt />
+              </div>
+              <h2 className="text-base font-black text-[#11142f] sm:text-lg">Business Address</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => openEditForm('address-info')}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#bdb7ff] bg-white px-5 py-3 text-sm font-bold text-[#6657f1] shadow-md transition-all duration-200 hover:bg-[#f6f4ff] hover:border-[#6657f1] hover:shadow-lg active:scale-95 sm:w-auto"
+            >
+              <FaEdit />
+              Edit
+            </button>
+          </div>
+          <p className="mb-2 text-sm font-bold text-slate-700">Address</p>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 sm:px-4">{business.address || '-'}</div>
+          <MapPreview />
+        </section>
       </div>
+
+      {showModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200"
+          onClick={() => { setShowModal(false); setEditingSection(null); }}
+        >
+          <div 
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl animate-in slide-in-from-bottom-4 zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">
+                    {editingSection === 'business-info' && 'Edit Business Information'}
+                    {editingSection === 'contact-info' && 'Edit Contact Information'}
+                    {editingSection === 'address-info' && 'Edit Business Address'}
+                    {!editingSection && 'Edit Information'}
+                  </h3>
+                  <p className="text-sm text-gray-600">Update your business details</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowModal(false); setEditingSection(null); }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {editingSection === 'business-info' && (
+                <>
+                  <div className="mb-6 grid gap-5 lg:grid-cols-2">
+                    <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-[#f8f7ff] to-white p-4">
+                      <label className="mb-3 block text-sm font-bold text-slate-700">Profile Image <span className="text-red-500">*</span></label>
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:flex-wrap">
+                        <div className="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8e4ff] ring-1 ring-[#d6d1ff]">
+                          {profilePreview ? (
+                            <img src={profilePreview} alt="Profile preview" className="h-full w-full object-cover" />
+                          ) : (
+                            <FaBuilding className="text-4xl text-[#6657f1]/45" />
+                          )}
+                        </div>
+                        <div className="flex w-full max-w-[220px] flex-col gap-3 sm:w-auto">
+                          <label className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-[#bdb7ff] bg-white px-4 py-3 text-sm font-bold text-[#6657f1] transition hover:bg-[#f6f4ff] sm:w-[150px]">
+                            <FaUpload />
+                            Change Image
+                            <input type="file" accept="image/*" onChange={handleImageChange('profileImage', setProfilePreview)} className="hidden" />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage('profileImage', setProfilePreview)}
+                            className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-3 text-sm font-bold text-red-500 transition hover:bg-red-50 sm:w-[150px]"
+                          >
+                            <FaRegTrashAlt />
+                            Remove
+                          </button>
+                          <p className="text-xs font-medium text-slate-500">JPG, PNG or WEBP. Max size 2MB.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-[#f8fbff] to-white p-4">
+                      <label className="mb-3 block text-sm font-bold text-slate-700">Logo <span className="text-red-500">*</span></label>
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:flex-wrap">
+                        <div className="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+                          {logoPreview ? (
+                            <img src={logoPreview} alt="Logo preview" className="h-full w-full object-contain p-2" />
+                          ) : (
+                            <FaBuilding className="text-4xl text-slate-300" />
+                          )}
+                        </div>
+                        <div className="flex w-full max-w-[220px] flex-col gap-3 sm:w-auto">
+                          <label className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-[#bdb7ff] bg-white px-4 py-3 text-sm font-bold text-[#6657f1] transition hover:bg-[#f6f4ff] sm:w-[150px]">
+                            <FaUpload />
+                            Upload Logo
+                            <input type="file" accept="image/*" onChange={handleImageChange('logo', setLogoPreview)} className="hidden" />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage('logo', setLogoPreview)}
+                            className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-3 text-sm font-bold text-red-500 transition hover:bg-red-50 sm:w-[150px]"
+                          >
+                            <FaRegTrashAlt />
+                            Remove
+                          </button>
+                          <p className="text-xs font-medium text-slate-500">PNG, SVG or JPG. Max size 2MB.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-slate-700">Business Name <span className="text-red-500">*</span></label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => updateField('name', e.target.value)}
+                        className={inputClass}
+                        placeholder="Raj Tech Solutions"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-slate-700">Tagline <span className="text-red-500">*</span></label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.tagline}
+                        onChange={(e) => updateField('tagline', e.target.value)}
+                        className={inputClass}
+                        placeholder="Smart Technology, Better Business."
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Description <span className="text-red-500">*</span></label>
+                    <textarea
+                      required
+                      maxLength={500}
+                      rows={4}
+                      value={formData.description}
+                      onChange={(e) => updateField('description', e.target.value)}
+                      className={`${inputClass} resize-none leading-6`}
+                      placeholder="Describe your business..."
+                    />
+                    <p className="mt-1 text-right text-xs font-medium text-slate-500">{formData.description.length} / 500</p>
+                  </div>
+                </>
+              )}
+
+              {editingSection === 'contact-info' && (
+                <div className="grid gap-5 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Phone <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                      <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                      <input
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={(e) => updateField('phone', e.target.value)}
+                        className={iconInputClass}
+                        placeholder="+91 98765 43210"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">WhatsApp <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                      <FaWhatsapp className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                      <input
+                        type="tel"
+                        required
+                        value={formData.whatsapp}
+                        onChange={(e) => updateField('whatsapp', e.target.value)}
+                        className={iconInputClass}
+                        placeholder="+91 98765 43210"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Email <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                      <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                      <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => updateField('email', e.target.value)}
+                        className={iconInputClass}
+                        placeholder="contact@rajtechsolutions.com"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Website <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                      <FaGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                      <input
+                        type="url"
+                        required
+                        value={formData.website}
+                        onChange={(e) => updateField('website', e.target.value)}
+                        className={iconInputClass}
+                        placeholder="https://www.rajtechsolutions.com"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {editingSection === 'address-info' && (
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-slate-700">Address <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      value={formData.address}
+                      onChange={(e) => updateField('address', e.target.value)}
+                      className={`${inputClass} pr-11`}
+                      placeholder="Lucknow, Uttar Pradesh, India"
+                    />
+                    <FaMapMarkerAlt className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500" />
+                  </div>
+                </div>
+              )}
+
+              {!editingSection && (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No section selected for editing</p>
+                  <p className="text-xs text-gray-400">EditingSection: {editingSection}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setShowModal(false); setEditingSection(null); }}
+                  className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#6657f1] to-[#5546dc] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6657f1]/25 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <FaSave />
+                  {loading ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
