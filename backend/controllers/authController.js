@@ -23,37 +23,49 @@ const generateUniqueSlug = async (name) => {
 // @access Public
 exports.register = async (req, res) => {
   try {
+    console.log('Register request body:', req.body);
     const { name, email, password, confirmPassword } = req.body;
 
     // Validation
     if (!name || !email || !password) {
+      console.log('Missing required fields');
       return res.status(400).json({ success: false, message: 'Please provide name, email and password' });
     }
     if (password !== confirmPassword) {
+      console.log('Passwords do not match');
       return res.status(400).json({ success: false, message: 'Passwords do not match' });
     }
     if (password.length < 6) {
+      console.log('Password too short');
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
     }
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('Email already registered:', email);
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
     // Create user
+    console.log('Creating user...');
     const user = await User.create({ name, email, password });
+    console.log('User created:', user._id);
 
     // Create blank business profile with slug
+    console.log('Creating business profile...');
     const slug = await generateUniqueSlug(name);
-    await Business.create({
+    console.log('Generated slug:', slug);
+    
+    const business = await Business.create({
       userId: user._id,
       businessName: name + "'s Business",
       slug,
     });
+    console.log('Business created:', business._id);
 
     const token = generateToken(user._id, user.email);
+    console.log('Token generated');
 
     res.status(201).json({
       success: true,
@@ -72,24 +84,31 @@ exports.register = async (req, res) => {
 // @access Public
 exports.login = async (req, res) => {
   try {
+    console.log('Login request body:', req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
+      console.log('Missing email or password');
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     }
 
     // Find user with password
+    console.log('Finding user:', email);
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
+      console.log('User not found:', email);
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
+    console.log('Comparing password...');
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      console.log('Password mismatch');
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
     const token = generateToken(user._id, user.email);
+    console.log('Login successful for:', email);
 
     res.json({
       success: true,
