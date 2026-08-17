@@ -3,7 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 console.log('🚀 Starting Bizcardly Server...');
 console.log('📋 Environment check:', {
@@ -13,7 +13,7 @@ console.log('📋 Environment check:', {
   JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set'
 });
 
-const connectDB = require('./config/db');
+const { connectDB } = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 
 // Route imports
@@ -26,7 +26,9 @@ const videoRoutes = require('./routes/videos');
 const visitorRoutes = require('./routes/visitors');
 
 // Connect to MongoDB
-connectDB();
+connectDB().catch((error) => {
+  console.error('Startup database connection failed:', error.message);
+});
 
 const app = express();
 
