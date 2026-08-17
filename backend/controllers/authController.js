@@ -23,7 +23,6 @@ const generateUniqueSlug = async (name) => {
 // @access Public
 exports.register = async (req, res) => {
   try {
-    await ensureDbConnection();
     console.log('Register request body:', req.body);
     const { name, email, password, confirmPassword } = req.body;
 
@@ -85,7 +84,6 @@ exports.register = async (req, res) => {
 // @access Public
 exports.login = async (req, res) => {
   try {
-    await ensureDbConnection();
     console.log('Login request body:', req.body);
     const { email, password } = req.body;
 
@@ -129,7 +127,6 @@ exports.login = async (req, res) => {
 // @access Private
 exports.getMe = async (req, res) => {
   try {
-    await ensureDbConnection();
     const user = req.user;
     const business = await Business.findOne({ userId: user._id });
 
@@ -148,7 +145,6 @@ exports.getMe = async (req, res) => {
 // @access Private
 exports.updatePassword = async (req, res) => {
   try {
-    await ensureDbConnection();
     const { currentPassword, newPassword } = req.body;
 
     const user = await User.findById(req.user._id).select('+password');
