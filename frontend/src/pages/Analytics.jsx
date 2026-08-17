@@ -13,7 +13,7 @@ const Analytics = () => {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('bizcardly_token');
-      const res = await fetch('http://localhost:5000/api/analytics', {
+      const res = await fetch('https://bizcardly.onrender.com/api/analytics', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

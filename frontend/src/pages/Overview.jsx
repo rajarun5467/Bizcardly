@@ -25,10 +25,10 @@ const Overview = () => {
       try {
         const token = localStorage.getItem('bizcardly_token');
         const [productsRes, servicesRes, galleryRes, videosRes] = await Promise.all([
-          fetch('http://localhost:5000/api/products', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/services', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/gallery', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('http://localhost:5000/api/videos', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('https://bizcardly.onrender.com/api/products', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('https://bizcardly.onrender.com/api/services', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('https://bizcardly.onrender.com/api/gallery', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('https://bizcardly.onrender.com/api/videos', { headers: { Authorization: `Bearer ${token}` } }),
         ]);
 
         const [products, services, gallery, videos] = await Promise.all([

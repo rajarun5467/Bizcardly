@@ -6,7 +6,7 @@ import {
   FaBox, FaConciergeBell, FaImages, FaVideo, FaUserLock
 } from 'react-icons/fa';
 
-const API_ORIGIN = 'http://localhost:5000';
+const API_ORIGIN = 'https://bizcardly.onrender.com';
 
 const assetUrl = (path) => {
   if (!path) return '';

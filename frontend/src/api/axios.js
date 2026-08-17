@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'https://bizcardly.onrender.com/api',
   // Don't set default Content-Type to allow FormData to work properly
 });
 
