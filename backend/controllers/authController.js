@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Business = require('../models/Business');
 const slugify = require('slugify');
-const { ensureDbConnection } = require('../config/db');
 
 // Generate JWT Token
 const generateToken = (id, email) => {
