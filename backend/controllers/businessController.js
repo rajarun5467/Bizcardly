@@ -7,7 +7,7 @@ const slugify = require('slugify');
 
 // Generate unique slug
 const generateUniqueSlug = async (name, excludeId = null) => {
-  let slug = slugify(name, { lower: true, strict: true });
+  let slug = slugify(name, { lower: true, strict: true, remove: /[*+~.()'"!:@]/g });
   let query = { slug };
   if (excludeId) query._id = { $ne: excludeId };
   let exists = await Business.findOne(query);

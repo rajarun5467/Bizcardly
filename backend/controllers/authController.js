@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Business = require('../models/Business');
 const slugify = require('slugify');
+const { ensureDbConnection } = require('../config/db');
 
 // Generate JWT Token
 const generateToken = (id, email) => {
@@ -10,7 +11,7 @@ const generateToken = (id, email) => {
 
 // Generate unique slug
 const generateUniqueSlug = async (name) => {
-  let slug = slugify(name, { lower: true, strict: true });
+  let slug = slugify(name, { lower: true, strict: true, remove: /[*+~.()'"!:@]/g });
   let exists = await Business.findOne({ slug });
   if (exists) {
     slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
@@ -23,6 +24,7 @@ const generateUniqueSlug = async (name) => {
 // @access Public
 exports.register = async (req, res) => {
   try {
+    await ensureDbConnection();
     console.log('Register request body:', req.body);
     const { name, email, password, confirmPassword } = req.body;
 
@@ -84,6 +86,7 @@ exports.register = async (req, res) => {
 // @access Public
 exports.login = async (req, res) => {
   try {
+    await ensureDbConnection();
     console.log('Login request body:', req.body);
     const { email, password } = req.body;
 
@@ -127,6 +130,7 @@ exports.login = async (req, res) => {
 // @access Private
 exports.getMe = async (req, res) => {
   try {
+    await ensureDbConnection();
     const user = req.user;
     const business = await Business.findOne({ userId: user._id });
 
@@ -145,6 +149,7 @@ exports.getMe = async (req, res) => {
 // @access Private
 exports.updatePassword = async (req, res) => {
   try {
+    await ensureDbConnection();
     const { currentPassword, newPassword } = req.body;
 
     const user = await User.findById(req.user._id).select('+password');
