@@ -62,6 +62,65 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'Bizcardly API is running 🚀' });
 });
 
+// Root route - API info
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Bizcardly Backend API',
+    version: '1.0.0',
+    endpoints: {
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        me: 'GET /api/auth/me'
+      },
+      business: {
+        get: 'GET /api/business',
+        create: 'POST /api/business',
+        update: 'PUT /api/business',
+        public: 'GET /api/business/public/:slug'
+      },
+      products: {
+        get: 'GET /api/products',
+        create: 'POST /api/products',
+        update: 'PUT /api/products/:id',
+        delete: 'DELETE /api/products/:id'
+      },
+      services: {
+        get: 'GET /api/services',
+        create: 'POST /api/services',
+        update: 'PUT /api/services/:id',
+        delete: 'DELETE /api/services/:id'
+      },
+      gallery: {
+        get: 'GET /api/gallery',
+        create: 'POST /api/gallery',
+        delete: 'DELETE /api/gallery/:id'
+      },
+      videos: {
+        get: 'GET /api/videos',
+        create: 'POST /api/videos',
+        delete: 'DELETE /api/videos/:id'
+      },
+      social: {
+        get: 'GET /api/social',
+        create: 'POST /api/social',
+        update: 'PUT /api/social'
+      },
+      payment: {
+        get: 'GET /api/payment',
+        create: 'POST /api/payment',
+        update: 'PUT /api/payment'
+      },
+      location: {
+        get: 'GET /api/location',
+        create: 'POST /api/location',
+        update: 'PUT /api/location'
+      }
+    }
+  });
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
