@@ -5,6 +5,14 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
+console.log('🚀 Starting Bizcardly Server...');
+console.log('📋 Environment check:', {
+  NODE_ENV: process.env.NODE_ENV,
+  PORT: process.env.PORT,
+  MONGO_URI: process.env.MONGO_URI ? 'Set' : 'Not set',
+  JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set'
+});
+
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -63,7 +71,17 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Bizcardly Server running on port ${PORT}`);
   console.log(`📁 Uploads folder: ${uploadsDir}`);
+  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Handle server errors
+server.on('error', (error) => {
+  console.error('❌ Server error:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${PORT} is already in use`);
+  }
+  process.exit(1);
 });
