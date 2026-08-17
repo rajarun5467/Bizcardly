@@ -12,6 +12,8 @@ const Dashboard = () => {
   const { business, logout } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(3);
+  const [hasViewedNotifications, setHasViewedNotifications] = useState(false);
 
   const menuItems = [
     { path: '/dashboard', icon: FaHome, label: 'Dashboard' },
@@ -102,11 +104,17 @@ const Dashboard = () => {
             </div>
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => alert('Notifications:\n1. New product added\n2. Service updated\n3. Gallery photo uploaded')}
+                onClick={() => {
+                  alert('Notifications:\n1. New product added\n2. Service updated\n3. Gallery photo uploaded');
+                  setHasViewedNotifications(true);
+                  setNotificationCount(0);
+                }}
                 className="relative hidden h-10 w-10 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 sm:flex hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <FaBell />
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff5959] text-[10px] font-bold text-white">3</span>
+                {!hasViewedNotifications && notificationCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff5959] text-[10px] font-bold text-white">{notificationCount}</span>
+                )}
               </button>
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 overflow-hidden rounded-full bg-white shadow-md ring-2 ring-[#6657f1]/20 p-0.5">
