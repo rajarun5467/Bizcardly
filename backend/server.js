@@ -43,41 +43,13 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Middleware
-const corsOptions = {
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      'https://bizcardly.vercel.app',
-      'https://www.bizcardly.vercel.app',
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      /^http:\/\/localhost:\d+$/, 
-      /^http:\/\/127\.0\.0\.1:\d+$/
-    ];
-
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    const isAllowed = allowedOrigins.some((allowedOrigin) => {
-      if (typeof allowedOrigin === 'string') {
-        return allowedOrigin === origin;
-      }
-      return allowedOrigin.test(origin);
-    });
-
-    if (isAllowed) {
-      return callback(null, true);
-    }
-
-    callback(new Error(`CORS blocked for origin: ${origin}`));
-  },
+app.use(cors({
+  origin: ['https://bizcardly.vercel.app', 'https://www.bizcardly.vercel.app', 'http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
-};
+}));
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));
