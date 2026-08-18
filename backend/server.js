@@ -42,9 +42,24 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Middleware
+// Middleware - CORS Configuration
+const allowedOrigins = [
+  'https://bizcardly.vercel.app',
+  'http://localhost:5173',        // Vite dev server
+  'http://localhost:3000',        // Standard dev port
+  'http://127.0.0.1:5173',       // Localhost alternative
+  'http://127.0.0.1:3000'        // Localhost alternative
+];
+
 app.use(cors({
-  origin: 'https://bizcardly.vercel.app',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']

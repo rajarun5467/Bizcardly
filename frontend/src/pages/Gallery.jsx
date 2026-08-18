@@ -25,9 +25,19 @@ const Gallery = () => {
 
   const fetchGallery = async () => {
     try {
+      console.log('📥 Fetching gallery...');
       const { data } = await api.get('/gallery');
+      console.log('✅ Gallery fetched:', data.gallery?.length || 0, 'images');
+      
+      if (data.gallery?.length > 0) {
+        data.gallery.forEach((item, idx) => {
+          console.log(`  ${idx + 1}. ID: ${item._id}, URL: ${item.imageUrl}`);
+        });
+      }
+      
       setGallery(data.gallery || []);
     } catch (err) {
+      console.error('❌ Gallery fetch error:', err.message);
       toast.error('Failed to fetch gallery');
     }
   };
@@ -53,21 +63,39 @@ const Gallery = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (selectedFiles.length === 0) return toast.error('Please select at least one image');
+    
     setLoading(true);
+    console.log(`📸 Starting upload of ${selectedFiles.length} file(s)`);
+    
     try {
       const data = new FormData();
-      selectedFiles.forEach(file => data.append('images', file));
+      selectedFiles.forEach((file, idx) => {
+        console.log(`  File ${idx + 1}: ${file.name} (${file.size} bytes)`);
+        data.append('images', file);
+      });
 
+      console.log('📤 Sending request to /gallery');
       const res = await api.post('/gallery', data);
+      
       const result = res.data;
+      console.log('✅ Upload response:', result);
+      
       if (!result.success) throw new Error(result.message || 'Failed to upload');
+      
+      console.log('📊 Saved images:');
+      result.gallery?.forEach((item, idx) => {
+        console.log(`  ${idx + 1}. URL: ${item.imageUrl}`);
+      });
+      
       toast.success('Images uploaded successfully!');
       setShowModal(false);
       setSelectedFiles([]);
       setPreviews([]);
       fetchGallery();
     } catch (err) {
-      toast.error(err.message);
+      console.error('❌ Upload error:', err.message);
+      console.error('Full error:', err);
+      toast.error(err.message || 'Upload failed');
     } finally {
       setLoading(false);
     }
@@ -101,23 +129,33 @@ const Gallery = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-staggered">
-        {gallery.map((item) => (
-          <div key={item._id} className="relative group overflow-hidden rounded-xl">
-            <img
-              src={assetUrl(item.imageUrl)}
-              alt="Gallery"
-              className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300 shadow-sm cursor-pointer"
-            />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-              <button
-                onClick={() => handleDelete(item._id)}
-                className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full transition flex items-center justify-center transform hover-scale shadow-lg"
-              >
-                <FaTrash size={16} />
-              </button>
+        {gallery.map((item) => {
+          const imageUrl = assetUrl(item.imageUrl);
+          console.log(`🖼️  Rendering image - ID: ${item._id}, URL: ${imageUrl}`);
+          
+          return (
+            <div key={item._id} className="relative group overflow-hidden rounded-xl">
+              <img
+                src={imageUrl}
+                alt="Gallery"
+                className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300 shadow-sm cursor-pointer"
+                onLoad={() => console.log(`✅ Image loaded: ${item._id}`)}
+                onError={(e) => {
+                  console.error(`❌ Image load failed: ${item._id}`, e);
+                  e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" fill="%239ca3af" text-anchor="middle" dy=".3em" font-size="14"%3EImage Failed to Load%3C/text%3E%3C/svg%3E';
+                }}
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <button
+                  onClick={() => handleDelete(item._id)}
+                  className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full transition flex items-center justify-center transform hover-scale shadow-lg"
+                >
+                  <FaTrash size={16} />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {gallery.length === 0 && (

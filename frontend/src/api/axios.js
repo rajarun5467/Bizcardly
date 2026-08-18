@@ -10,26 +10,51 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('bizcardly_token');
-    console.log('Axios request interceptor - token:', token ? 'exists' : 'missing');
+    console.log(`📤 [${config.method.toUpperCase()}] ${config.url}`);
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Token added to request');
+      console.log('✓ Token added to request');
+    } else {
+      console.warn('⚠️  No token found in localStorage');
     }
+    
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('❌ Request interceptor error:', error);
+    return Promise.reject(error);
+  }
 );
 
 // Response interceptor - handle auth errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`✅ Response received:`, response.status, response.data?.message || '');
+    return response;
+  },
   (error) => {
-    console.log('Axios response error:', error.response?.status, error.response?.data);
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const message = error.response?.data?.message || error.message;
+    
+    console.error(`❌ API Error [${status}]:`, message);
+    console.error('Full error:', error.response?.data || error);
+    
+    if (status === 401) {
+      console.warn('🔐 Unauthorized - logging out user');
       localStorage.removeItem('bizcardly_token');
       localStorage.removeItem('bizcardly_user');
       window.location.href = '/login';
     }
+    
+    if (status === 403) {
+      console.warn('🚫 Forbidden access');
+    }
+    
+    if (status === 500) {
+      console.error('🔥 Server error - check backend logs');
+    }
+    
     return Promise.reject(error);
   }
 );
