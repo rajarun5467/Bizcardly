@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../api/config';
+import { getImageUrl, validateImageUrl } from '../utils/imageUrl';
 import {
   FaBuilding, FaEdit, FaEnvelope, FaGlobe, FaImage, FaMapMarkerAlt,
   FaPhone, FaRegTrashAlt, FaSave, FaUpload, FaWhatsapp
@@ -18,36 +19,13 @@ const cardClass =
 
 const MapPreview = () => null;
 
-const assetUrl = (url) => {
+const assetUrl = (url, context = 'Profile') => {
   if (!url) {
-    console.log('❌ assetUrl: No URL provided');
+    console.log(`🖼️  [${context}] assetUrl: No URL provided`);
     return '';
   }
   
-  // Already a full URL (Cloudinary or external)
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    console.log(`✅ assetUrl: Full URL detected`, url);
-    return url;
-  }
-  
-  // Local upload path
-  if (url.startsWith('/uploads/')) {
-    const baseUrl = API_BASE_URL.replace('/api', '');
-    const fullUrl = `${baseUrl}${url}`;
-    console.log(`📁 assetUrl: Local upload path`, {input: url, base: baseUrl, output: fullUrl});
-    return fullUrl;
-  }
-  
-  // Relative path without leading slash
-  if (!url.startsWith('/')) {
-    const baseUrl = API_BASE_URL.replace('/api', '');
-    const fullUrl = `${baseUrl}/uploads/${url}`;
-    console.log(`📁 assetUrl: Relative path`, {input: url, output: fullUrl});
-    return fullUrl;
-  }
-  
-  console.log('⚠️  assetUrl: Unknown format', url);
-  return url;
+  return getImageUrl(url, context);
 };
 
 const Profile = () => {
@@ -308,6 +286,15 @@ const Profile = () => {
 
   return (
     <div className="space-y-4 animate-fade-in sm:space-y-5">
+      {/* Data Debug Info */}
+      {business && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 hidden">
+          <p className="text-xs text-blue-700">
+            📊 Debug: Logo={business.logo?.substring(0, 30)}... | Profile={business.profileImage?.substring(0, 30)}...
+          </p>
+        </div>
+      )}
+      
       <section className={`${cardClass} overflow-hidden`}>
         <div className="mb-4 flex items-center gap-3 sm:mb-5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f0efff] text-[#6657f1]">
@@ -323,18 +310,22 @@ const Profile = () => {
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 sm:h-32 sm:w-32">
                 {business.logo ? (
                   (() => {
-                    const logoUrl = assetUrl(business.logo);
+                    const logoUrl = assetUrl(business.logo, 'Logo Display');
                     console.log('🖼️  Rendering logo image:', logoUrl);
                     return (
                       <img 
                         src={logoUrl} 
                         alt="Logo" 
                         className="h-full w-full object-contain p-2"
+                        data-type="business-logo"
+                        data-original={business.logo}
+                        data-processed={logoUrl}
                         onLoad={() => console.log(`✅ Logo displayed: ${business._id}`)}
                         onError={(e) => {
                           console.error(`❌ Logo failed to display: ${business._id}`);
                           console.error(`   Attempted URL: ${logoUrl}`);
                           console.error(`   Original path: ${business.logo}`);
+                          console.error(`   Element data-original: ${e.target.getAttribute('data-original')}`);
                           e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" fill="%239ca3af" text-anchor="middle" dy=".3em" font-size="12"%3ENo Logo%3C/text%3E%3C/svg%3E';
                         }}
                       />
@@ -357,18 +348,22 @@ const Profile = () => {
               <div className="flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8e4ff] ring-1 ring-[#d6d1ff] sm:h-48 sm:w-48">
                 {business.profileImage ? (
                   (() => {
-                    const profileUrl = assetUrl(business.profileImage);
+                    const profileUrl = assetUrl(business.profileImage, 'Profile Image Display');
                     console.log('🖼️  Rendering profile image:', profileUrl);
                     return (
                       <img 
                         src={profileUrl} 
                         alt="Profile" 
                         className="h-full w-full object-cover"
+                        data-type="business-profile-image"
+                        data-original={business.profileImage}
+                        data-processed={profileUrl}
                         onLoad={() => console.log(`✅ Profile image displayed: ${business._id}`)}
                         onError={(e) => {
                           console.error(`❌ Profile image failed to display: ${business._id}`);
                           console.error(`   Attempted URL: ${profileUrl}`);
                           console.error(`   Original path: ${business.profileImage}`);
+                          console.error(`   Element data-original: ${e.target.getAttribute('data-original')}`);
                           e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Ccircle cx="100" cy="100" r="100" fill="%23e8e4ff"/%3E%3Ctext x="50%25" y="50%25" fill="%23999" text-anchor="middle" dy=".3em" font-size="14"%3ENo Image%3C/text%3E%3C/svg%3E';
                         }}
                       />
