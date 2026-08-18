@@ -19,9 +19,34 @@ const cardClass =
 const MapPreview = () => null;
 
 const assetUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  if (url.startsWith('/uploads/')) return `${API_BASE_URL.replace('/api', '')}${url}`;
+  if (!url) {
+    console.log('❌ assetUrl: No URL provided');
+    return '';
+  }
+  
+  // Already a full URL (Cloudinary or external)
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    console.log(`✅ assetUrl: Full URL detected`, url);
+    return url;
+  }
+  
+  // Local upload path
+  if (url.startsWith('/uploads/')) {
+    const baseUrl = API_BASE_URL.replace('/api', '');
+    const fullUrl = `${baseUrl}${url}`;
+    console.log(`📁 assetUrl: Local upload path`, {input: url, base: baseUrl, output: fullUrl});
+    return fullUrl;
+  }
+  
+  // Relative path without leading slash
+  if (!url.startsWith('/')) {
+    const baseUrl = API_BASE_URL.replace('/api', '');
+    const fullUrl = `${baseUrl}/uploads/${url}`;
+    console.log(`📁 assetUrl: Relative path`, {input: url, output: fullUrl});
+    return fullUrl;
+  }
+  
+  console.log('⚠️  assetUrl: Unknown format', url);
   return url;
 };
 
@@ -48,6 +73,13 @@ const Profile = () => {
 
   useEffect(() => {
     if (business) {
+      console.log('📋 Profile - Business data loaded:', {
+        id: business._id,
+        name: business.name || business.businessName,
+        logo: business.logo,
+        profileImage: business.profileImage
+      });
+      
       setFormData({
         name: business.name || business.businessName || '',
         tagline: business.tagline || '',
@@ -60,8 +92,20 @@ const Profile = () => {
         logo: null,
         profileImage: null,
       });
-      setLogoPreview(business.logo || '');
-      setProfilePreview(business.profileImage || '');
+      
+      // Set preview URLs
+      if (business.logo) {
+        const logoUrl = assetUrl(business.logo);
+        console.log('🖼️  Setting logo preview:', logoUrl);
+        setLogoPreview(logoUrl);
+      }
+      
+      if (business.profileImage) {
+        const profileUrl = assetUrl(business.profileImage);
+        console.log('🖼️  Setting profile image preview:', profileUrl);
+        setProfilePreview(profileUrl);
+      }
+      
       if (!hasInitialized) {
         setEditingSection(null);
         setHasInitialized(true);
@@ -278,16 +322,24 @@ const Profile = () => {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 sm:h-32 sm:w-32">
                 {business.logo ? (
-                  <img 
-                    src={assetUrl(business.logo)} 
-                    alt="Logo" 
-                    className="h-full w-full object-contain p-2"
-                    onLoad={() => console.log(`✅ Logo loaded: ${business._id}`)}
-                    onError={(e) => {
-                      console.error(`❌ Logo failed to load: ${business._id}`, e);
-                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3C/svg%3E';
-                    }}
-                  />
+                  (() => {
+                    const logoUrl = assetUrl(business.logo);
+                    console.log('🖼️  Rendering logo image:', logoUrl);
+                    return (
+                      <img 
+                        src={logoUrl} 
+                        alt="Logo" 
+                        className="h-full w-full object-contain p-2"
+                        onLoad={() => console.log(`✅ Logo displayed: ${business._id}`)}
+                        onError={(e) => {
+                          console.error(`❌ Logo failed to display: ${business._id}`);
+                          console.error(`   Attempted URL: ${logoUrl}`);
+                          console.error(`   Original path: ${business.logo}`);
+                          e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" fill="%239ca3af" text-anchor="middle" dy=".3em" font-size="12"%3ENo Logo%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
+                    );
+                  })()
                 ) : (
                   <FaBuilding className="text-3xl text-slate-300 sm:text-4xl" />
                 )}
@@ -304,16 +356,24 @@ const Profile = () => {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8e4ff] ring-1 ring-[#d6d1ff] sm:h-48 sm:w-48">
                 {business.profileImage ? (
-                  <img 
-                    src={assetUrl(business.profileImage)} 
-                    alt="Profile" 
-                    className="h-full w-full object-cover"
-                    onLoad={() => console.log(`✅ Profile image loaded: ${business._id}`)}
-                    onError={(e) => {
-                      console.error(`❌ Profile image failed to load: ${business._id}`, e);
-                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Ccircle cx="100" cy="100" r="100" fill="%23e8e4ff"/%3E%3C/svg%3E';
-                    }}
-                  />
+                  (() => {
+                    const profileUrl = assetUrl(business.profileImage);
+                    console.log('🖼️  Rendering profile image:', profileUrl);
+                    return (
+                      <img 
+                        src={profileUrl} 
+                        alt="Profile" 
+                        className="h-full w-full object-cover"
+                        onLoad={() => console.log(`✅ Profile image displayed: ${business._id}`)}
+                        onError={(e) => {
+                          console.error(`❌ Profile image failed to display: ${business._id}`);
+                          console.error(`   Attempted URL: ${profileUrl}`);
+                          console.error(`   Original path: ${business.profileImage}`);
+                          e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Ccircle cx="100" cy="100" r="100" fill="%23e8e4ff"/%3E%3Ctext x="50%25" y="50%25" fill="%23999" text-anchor="middle" dy=".3em" font-size="14"%3ENo Image%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
+                    );
+                  })()
                 ) : (
                   <FaBuilding className="text-4xl text-[#6657f1]/45 sm:text-5xl" />
                 )}
@@ -462,7 +522,21 @@ const Profile = () => {
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:flex-wrap">
                         <div className="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8e4ff] ring-1 ring-[#d6d1ff]">
                           {profilePreview ? (
-                            <img src={profilePreview} alt="Profile preview" className="h-full w-full object-cover" />
+                            (() => {
+                              console.log('🖼️  Profile preview rendered:', profilePreview);
+                              return (
+                                <img 
+                                  src={profilePreview} 
+                                  alt="Profile preview" 
+                                  className="h-full w-full object-cover"
+                                  onLoad={() => console.log('✅ Profile preview loaded')}
+                                  onError={(e) => {
+                                    console.error('❌ Profile preview failed', profilePreview);
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              );
+                            })()
                           ) : (
                             <FaBuilding className="text-4xl text-[#6657f1]/45" />
                           )}
@@ -491,7 +565,21 @@ const Profile = () => {
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:flex-wrap">
                         <div className="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
                           {logoPreview ? (
-                            <img src={logoPreview} alt="Logo preview" className="h-full w-full object-contain p-2" />
+                            (() => {
+                              console.log('🖼️  Logo preview rendered:', logoPreview);
+                              return (
+                                <img 
+                                  src={logoPreview} 
+                                  alt="Logo preview" 
+                                  className="h-full w-full object-contain p-2"
+                                  onLoad={() => console.log('✅ Logo preview loaded')}
+                                  onError={(e) => {
+                                    console.error('❌ Logo preview failed', logoPreview);
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              );
+                            })()
                           ) : (
                             <FaBuilding className="text-4xl text-slate-300" />
                           )}
