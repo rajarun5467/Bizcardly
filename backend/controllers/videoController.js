@@ -20,7 +20,13 @@ const getYouTubeId = (url) => {
 exports.addVideo = async (req, res) => {
   try {
     console.log('🎬 Adding video...');
+    console.log('   User ID:', req.user?._id);
     console.log('   Request body:', req.body);
+    
+    if (!req.user || !req.user._id) {
+      console.error('❌ User not authenticated');
+      return res.status(401).json({ success: false, message: 'User not authenticated' });
+    }
     
     const businessId = await getBusinessId(req.user._id);
     console.log(`🏢 Business ID: ${businessId}`);
@@ -33,9 +39,13 @@ exports.addVideo = async (req, res) => {
     }
 
     const extractedYoutubeId = youtubeId || getYouTubeId(videoUrl);
+    if (!extractedYoutubeId) {
+      console.error('❌ Could not extract YouTube ID from URL:', videoUrl);
+      return res.status(400).json({ success: false, message: 'Invalid YouTube URL format' });
+    }
     console.log('🔗 YouTube ID extracted:', extractedYoutubeId);
 
-    const thumbnail = extractedYoutubeId ? `https://img.youtube.com/vi/${extractedYoutubeId}/hqdefault.jpg` : '';
+    const thumbnail = `https://img.youtube.com/vi/${extractedYoutubeId}/hqdefault.jpg`;
 
     const video = await Video.create({
       businessId,
@@ -46,9 +56,12 @@ exports.addVideo = async (req, res) => {
     });
 
     console.log(`✅ Video created successfully: ${video._id}`);
+    console.log(`   Title: ${video.title}`);
+    console.log(`   YouTube ID: ${video.youtubeId}`);
     res.status(201).json({ success: true, message: 'Video added', video });
   } catch (error) {
     console.error('❌ Add video error:', error.message);
+    console.error('   Stack trace:', error.stack);
     res.status(500).json({ success: false, message: error.message });
   }
 };

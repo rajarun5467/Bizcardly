@@ -55,31 +55,66 @@ const Videos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted');
-    console.log('Form data:', formData);
+    console.log('📝 Form submitted');
+    console.log('   Form data:', formData);
+    
+    if (!formData.title.trim()) {
+      console.warn('⚠️  Title is empty');
+      return toast.error('Please enter a video title');
+    }
+    
+    if (!formData.url.trim()) {
+      console.warn('⚠️  URL is empty');
+      return toast.error('Please enter a YouTube URL');
+    }
     
     const youtubeId = getYoutubeId(formData.url);
-    console.log('YouTube ID:', youtubeId);
+    console.log('🔗 YouTube ID extracted:', youtubeId);
     
     if (!youtubeId) {
-      console.log('Invalid YouTube URL');
-      return toast.error('Please enter a valid YouTube URL');
+      console.warn('❌ Invalid YouTube URL:', formData.url);
+      return toast.error('Please enter a valid YouTube URL (youtube.com/watch?v=... or youtu.be/...)');
     }
     
     setLoading(true);
     try {
-      console.log('Submitting video:', { title: formData.title, videoUrl: formData.url, youtubeId });
-      const res = await api.post('/videos', { title: formData.title, videoUrl: formData.url, youtubeId });
+      const payload = { 
+        title: formData.title.trim(), 
+        videoUrl: formData.url.trim(), 
+        youtubeId 
+      };
+      console.log('📤 Submitting video:', payload);
+      
+      const res = await api.post('/videos', payload);
       const result = res.data;
-      console.log('Video upload response:', result);
-      if (!result.success) throw new Error(result.message || 'Failed to add video');
+      
+      console.log('📥 Response received:', result);
+      
+      if (!result.success) {
+        console.error('❌ API returned success: false', result.message);
+        throw new Error(result.message || 'Failed to add video');
+      }
+      
+      console.log('✅ Video added successfully!');
       toast.success('Video added successfully!');
       setShowModal(false);
       setFormData({ title: '', url: '' });
-      fetchVideos();
+      
+      console.log('🔄 Fetching updated videos...');
+      await fetchVideos();
     } catch (err) {
-      console.error('Video upload error:', err);
-      toast.error(err.message);
+      console.error('❌ Video submission error:', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data,
+        url: err.config?.url,
+        method: err.config?.method
+      });
+      
+      // Show detailed error message
+      const errorMsg = err.response?.data?.message || err.message || 'Failed to add video';
+      console.error('📢 Showing error toast:', errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
