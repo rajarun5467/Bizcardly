@@ -13,12 +13,21 @@ const getBusinessId = async (userId) => {
 // @access Private
 exports.createService = async (req, res) => {
   try {
+    console.log('🔧 Creating service...');
+    
     const businessId = await getBusinessId(req.user._id);
+    console.log(`🏢 Business ID: ${businessId}`);
+    
     const { name, description, price, category, status } = req.body;
 
-    if (!name) return res.status(400).json({ success: false, message: 'Service name is required' });
+    if (!name) {
+      console.error('❌ Service name missing');
+      return res.status(400).json({ success: false, message: 'Service name is required' });
+    }
 
     const image = req.file ? `/uploads/${req.file.filename}` : '';
+
+    console.log(`📝 Creating service: ${name}, Price: ${price}`);
 
     const service = await Service.create({
       businessId,
@@ -30,8 +39,11 @@ exports.createService = async (req, res) => {
       image,
     });
 
+    console.log(`✅ Service created successfully: ${service._id}`);
+
     res.status(201).json({ success: true, message: 'Service created', service });
   } catch (error) {
+    console.error('❌ Create service error:', error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -41,10 +53,23 @@ exports.createService = async (req, res) => {
 // @access Private
 exports.getServices = async (req, res) => {
   try {
+    console.log('📥 Fetching services...');
+    
     const businessId = await getBusinessId(req.user._id);
+    console.log(`🏢 Business ID: ${businessId}`);
+    
     const services = await Service.find({ businessId }).sort({ createdAt: -1 });
+    
+    console.log(`✅ Found ${services.length} service(s)`);
+    if (services.length > 0) {
+      services.forEach((service, idx) => {
+        console.log(`  ${idx + 1}. ${service.name} - Price: ${service.price}`);
+      });
+    }
+    
     res.json({ success: true, services });
   } catch (error) {
+    console.error('❌ Get services error:', error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };

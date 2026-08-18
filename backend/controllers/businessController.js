@@ -37,9 +37,14 @@ exports.getBusiness = async (req, res) => {
 // @access Private
 exports.updateBusiness = async (req, res) => {
   try {
+    console.log('📋 Updating business profile...');
+    console.log(`🔐 User ID: ${req.user._id}`);
+    
     let business = await Business.findOne({ userId: req.user._id });
     
     if (!business) {
+      console.log('📝 Creating new business...');
+      
       // Create new business if doesn't exist
       const {
         name, businessName, category, tagline, about, description, phone, whatsapp,
@@ -70,17 +75,30 @@ exports.updateBusiness = async (req, res) => {
 
       // Handle file uploads for new business
       if (req.files) {
-        if (req.files.logo) business.logo = `/uploads/${req.files.logo[0].filename}`;
-        if (req.files.profileImage) business.profileImage = `/uploads/${req.files.profileImage[0].filename}`;
-        if (req.files.paymentQR) business.paymentQR = `/uploads/${req.files.paymentQR[0].filename}`;
+        if (req.files.logo) {
+          console.log(`📁 Logo: ${req.files.logo[0].filename}`);
+          business.logo = `/uploads/${req.files.logo[0].filename}`;
+        }
+        if (req.files.profileImage) {
+          console.log(`📁 Profile Image: ${req.files.profileImage[0].filename}`);
+          business.profileImage = `/uploads/${req.files.profileImage[0].filename}`;
+        }
+        if (req.files.paymentQR) {
+          console.log(`📁 Payment QR: ${req.files.paymentQR[0].filename}`);
+          business.paymentQR = `/uploads/${req.files.paymentQR[0].filename}`;
+        }
       }
       if (req.file) {
+        console.log(`📁 File: ${req.file.filename}`);
         business.logo = `/uploads/${req.file.filename}`;
       }
 
       await business.save();
+      console.log(`✅ Business created successfully: ${business._id}`);
       return res.status(201).json({ success: true, message: 'Business created successfully', business });
     }
+
+    console.log(`🏢 Updating existing business: ${business._id}`);
 
     const {
       businessName, name, category, tagline, about, description, phone, whatsapp,
@@ -103,6 +121,7 @@ exports.updateBusiness = async (req, res) => {
       // Regenerate slug if name changed
       if (finalName !== oldName) {
         business.slug = await generateUniqueSlug(finalName, business._id);
+        console.log(`🔗 Slug updated: ${business.slug}`);
       }
     }
     if (category !== undefined) business.category = category;
@@ -143,18 +162,30 @@ exports.updateBusiness = async (req, res) => {
 
     // Handle file uploads
     if (req.files) {
-      if (req.files.logo) business.logo = `/uploads/${req.files.logo[0].filename}`;
-      if (req.files.profileImage) business.profileImage = `/uploads/${req.files.profileImage[0].filename}`;
-      if (req.files.paymentQR) business.paymentQR = `/uploads/${req.files.paymentQR[0].filename}`;
+      if (req.files.logo) {
+        console.log(`📁 Logo: ${req.files.logo[0].filename}`);
+        business.logo = `/uploads/${req.files.logo[0].filename}`;
+      }
+      if (req.files.profileImage) {
+        console.log(`📁 Profile Image: ${req.files.profileImage[0].filename}`);
+        business.profileImage = `/uploads/${req.files.profileImage[0].filename}`;
+      }
+      if (req.files.paymentQR) {
+        console.log(`📁 Payment QR: ${req.files.paymentQR[0].filename}`);
+        business.paymentQR = `/uploads/${req.files.paymentQR[0].filename}`;
+      }
     }
     if (req.file) {
+      console.log(`📁 File: ${req.file.filename}`);
       business.logo = `/uploads/${req.file.filename}`;
     }
 
     await business.save();
+    console.log(`✅ Business updated successfully: ${business._id}`);
     res.json({ success: true, message: 'Business updated successfully', business });
   } catch (error) {
-    console.error('Update business error:', error);
+    console.error('❌ Update business error:', error.message);
+    console.error('Stack trace:', error.stack);
     res.status(500).json({ success: false, message: error.message });
   }
 };

@@ -26,12 +26,19 @@ const Products = () => {
 
   const fetchProducts = async () => {
     try {
-      console.log('Fetching products...');
+      console.log('📥 Fetching products...');
       const { data } = await api.get('/products');
-      console.log('Products data:', data);
+      console.log('✅ Products fetched:', data.products?.length || 0, 'products');
+      
+      if (data.products?.length > 0) {
+        data.products.forEach((item, idx) => {
+          console.log(`  ${idx + 1}. ID: ${item._id}, Name: ${item.name}, Image: ${item.image || 'none'}`);
+        });
+      }
+      
       setProducts(data.products || []);
     } catch (err) {
-      console.error('Fetch products error:', err);
+      console.error('❌ Fetch products error:', err.message);
       toast.error('Failed to fetch products');
     }
   };
@@ -54,21 +61,34 @@ const Products = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    console.log('📸 Starting product creation/update');
+    
     try {
       const data = new FormData();
       data.append('name', formData.name);
       data.append('price', formData.price);
       data.append('description', formData.description);
-      if (formData.image) data.append('image', formData.image);
+      
+      if (formData.image && formData.image instanceof File) {
+        console.log(`  Image: ${formData.image.name} (${formData.image.size} bytes)`);
+        data.append('image', formData.image);
+      } else if (formData.image) {
+        console.log(`  Keeping existing image: ${formData.image}`);
+      }
 
+      console.log('📤 Sending request to /products');
       const res = await api.post('/products', data);
       const result = res.data;
+      
+      console.log('✅ Response received:', result);
       if (!result.success) throw new Error(result.message || 'Failed to save product');
+      
       toast.success(editingProduct ? 'Product updated!' : 'Product added!');
       setShowModal(false);
       resetForm();
       fetchProducts();
     } catch (err) {
+      console.error('❌ Product save error:', err.message);
       toast.error(err.message);
     } finally {
       setLoading(false);
@@ -121,37 +141,51 @@ const Products = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-staggered">
-        {products.map((product) => (
-          <div key={product._id} className="bg-white rounded-xl shadow-sm overflow-hidden hover-lift transition group">
-            {product.image && (
-              <div className="relative overflow-hidden h-48 bg-gray-200">
-                <img src={assetUrl(product.image)} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-              </div>
-            )}
-            <div className="p-4">
-              <h3 className="font-semibold text-gray-800 group-hover:text-indigo-600 transition">{product.name}</h3>
-              <p className="text-indigo-600 font-bold mt-1 flex items-center gap-1">
-                <FaRupeeSign />
-                {product.price}
-              </p>
-              <p className="text-gray-600 text-sm mt-2 line-clamp-2">{product.description}</p>
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() => handleEdit(product)}
-                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-indigo-100 hover:text-indigo-600 transition hover-scale"
-                >
-                  <FaEdit /> Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(product._id)}
-                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition hover-scale"
-                >
-                  <FaTrash /> Delete
-                </button>
+        {products.map((product) => {
+          const imageUrl = assetUrl(product.image);
+          console.log(`🛍️  Product - ID: ${product._id}, Image: ${imageUrl}`);
+          
+          return (
+            <div key={product._id} className="bg-white rounded-xl shadow-sm overflow-hidden hover-lift transition group">
+              {product.image && (
+                <div className="relative overflow-hidden h-48 bg-gray-200">
+                  <img 
+                    src={imageUrl} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    onLoad={() => console.log(`✅ Product image loaded: ${product._id}`)}
+                    onError={(e) => {
+                      console.error(`❌ Product image failed to load: ${product._id}`, e);
+                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200"%3E%3Crect fill="%23f3f4f6" width="300" height="200"/%3E%3Ctext x="50%25" y="50%25" fill="%239ca3af" text-anchor="middle" dy=".3em" font-size="14"%3EImage Failed to Load%3C/text%3E%3C/svg%3E';
+                    }}
+                  />
+                </div>
+              )}
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-800 group-hover:text-indigo-600 transition">{product.name}</h3>
+                <p className="text-indigo-600 font-bold mt-1 flex items-center gap-1">
+                  <FaRupeeSign />
+                  {product.price}
+                </p>
+                <p className="text-gray-600 text-sm mt-2 line-clamp-2">{product.description}</p>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => handleEdit(product)}
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-indigo-100 hover:text-indigo-600 transition hover-scale"
+                  >
+                    <FaEdit /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product._id)}
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition hover-scale"
+                  >
+                    <FaTrash /> Delete
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {products.length === 0 && (

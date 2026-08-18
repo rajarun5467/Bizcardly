@@ -24,6 +24,7 @@ const Overview = () => {
 
     const fetchStats = async () => {
       try {
+        console.log('📊 Fetching dashboard stats...');
         const token = localStorage.getItem('bizcardly_token');
         const [productsRes, servicesRes, galleryRes, videosRes] = await Promise.all([
           fetch(`${API_BASE_URL}/products`, { headers: { Authorization: `Bearer ${token}` } }),
@@ -39,6 +40,13 @@ const Overview = () => {
           videosRes.json(),
         ]);
 
+        console.log('✅ Stats loaded:', {
+          products: products.products?.length || 0,
+          services: services.services?.length || 0,
+          gallery: gallery.gallery?.length || 0,
+          videos: videos.videos?.length || 0,
+        });
+
         setStats({
           products: products.products?.length || 0,
           services: services.services?.length || 0,
@@ -46,7 +54,7 @@ const Overview = () => {
           videos: videos.videos?.length || 0,
         });
       } catch (err) {
-        console.error('Failed to fetch stats:', err);
+        console.error('❌ Failed to fetch stats:', err);
       }
     };
 

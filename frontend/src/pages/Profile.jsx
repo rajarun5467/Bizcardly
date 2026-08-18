@@ -94,6 +94,7 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    console.log('📋 Starting profile update');
 
     try {
       const token = localStorage.getItem('bizcardly_token');
@@ -101,6 +102,7 @@ const Profile = () => {
         throw new Error('Authentication token not found. Please login again.');
       }
 
+      console.log('📦 Preparing form data...');
       const data = new FormData();
       data.append('name', formData.name || '');
       data.append('businessName', formData.name || '');
@@ -114,13 +116,16 @@ const Profile = () => {
       data.append('address', formData.address || '');
 
       if (formData.logo && formData.logo instanceof File) {
+        console.log(`  Logo: ${formData.logo.name} (${formData.logo.size} bytes)`);
         data.append('logo', formData.logo);
       }
 
       if (formData.profileImage && formData.profileImage instanceof File) {
+        console.log(`  Profile Image: ${formData.profileImage.name} (${formData.profileImage.size} bytes)`);
         data.append('profileImage', formData.profileImage);
       }
 
+      console.log('📤 Sending profile update request...');
       const res = await fetch(`${API_BASE_URL}/business`, {
         method: business ? 'PUT' : 'POST',
         headers: {
@@ -130,6 +135,8 @@ const Profile = () => {
       });
 
       const result = await res.json();
+      console.log('✅ Profile response:', result);
+      
       if (!res.ok) {
         throw new Error(result.message || `Failed to save profile (${res.status})`);
       }
@@ -140,7 +147,7 @@ const Profile = () => {
       setShowModal(false);
       setHasInitialized(true);
     } catch (err) {
-      console.error('Profile save error:', err);
+      console.error('❌ Profile save error:', err);
       toast.error(err.message || 'Failed to save profile');
     } finally {
       setLoading(false);
@@ -271,7 +278,16 @@ const Profile = () => {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 sm:h-32 sm:w-32">
                 {business.logo ? (
-                  <img src={assetUrl(business.logo)} alt="Logo" className="h-full w-full object-contain p-2" />
+                  <img 
+                    src={assetUrl(business.logo)} 
+                    alt="Logo" 
+                    className="h-full w-full object-contain p-2"
+                    onLoad={() => console.log(`✅ Logo loaded: ${business._id}`)}
+                    onError={(e) => {
+                      console.error(`❌ Logo failed to load: ${business._id}`, e);
+                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3C/svg%3E';
+                    }}
+                  />
                 ) : (
                   <FaBuilding className="text-3xl text-slate-300 sm:text-4xl" />
                 )}
@@ -288,7 +304,16 @@ const Profile = () => {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8e4ff] ring-1 ring-[#d6d1ff] sm:h-48 sm:w-48">
                 {business.profileImage ? (
-                  <img src={assetUrl(business.profileImage)} alt="Profile" className="h-full w-full object-cover" />
+                  <img 
+                    src={assetUrl(business.profileImage)} 
+                    alt="Profile" 
+                    className="h-full w-full object-cover"
+                    onLoad={() => console.log(`✅ Profile image loaded: ${business._id}`)}
+                    onError={(e) => {
+                      console.error(`❌ Profile image failed to load: ${business._id}`, e);
+                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Ccircle cx="100" cy="100" r="100" fill="%23e8e4ff"/%3E%3C/svg%3E';
+                    }}
+                  />
                 ) : (
                   <FaBuilding className="text-4xl text-[#6657f1]/45 sm:text-5xl" />
                 )}

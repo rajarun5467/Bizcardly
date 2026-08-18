@@ -19,16 +19,21 @@ const getYouTubeId = (url) => {
 // @access Private
 exports.addVideo = async (req, res) => {
   try {
-    console.log('Add video request body:', req.body);
+    console.log('🎬 Adding video...');
+    console.log('   Request body:', req.body);
+    
     const businessId = await getBusinessId(req.user._id);
+    console.log(`🏢 Business ID: ${businessId}`);
+    
     const { title, videoUrl, youtubeId } = req.body;
 
     if (!title || !videoUrl) {
+      console.error('❌ Title or URL missing');
       return res.status(400).json({ success: false, message: 'Title and video URL are required' });
     }
 
     const extractedYoutubeId = youtubeId || getYouTubeId(videoUrl);
-    console.log('YouTube ID extracted:', extractedYoutubeId);
+    console.log('🔗 YouTube ID extracted:', extractedYoutubeId);
 
     const thumbnail = extractedYoutubeId ? `https://img.youtube.com/vi/${extractedYoutubeId}/hqdefault.jpg` : '';
 
@@ -40,10 +45,10 @@ exports.addVideo = async (req, res) => {
       thumbnail,
     });
 
-    console.log('Video created:', video);
+    console.log(`✅ Video created successfully: ${video._id}`);
     res.status(201).json({ success: true, message: 'Video added', video });
   } catch (error) {
-    console.error('Add video error:', error);
+    console.error('❌ Add video error:', error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -53,10 +58,23 @@ exports.addVideo = async (req, res) => {
 // @access Private
 exports.getVideos = async (req, res) => {
   try {
+    console.log('📥 Fetching videos...');
+    
     const businessId = await getBusinessId(req.user._id);
+    console.log(`🏢 Business ID: ${businessId}`);
+    
     const videos = await Video.find({ businessId }).sort({ createdAt: -1 });
+    
+    console.log(`✅ Found ${videos.length} video(s)`);
+    if (videos.length > 0) {
+      videos.forEach((video, idx) => {
+        console.log(`  ${idx + 1}. ${video.title} - YouTube ID: ${video.youtubeId}`);
+      });
+    }
+    
     res.json({ success: true, videos });
   } catch (error) {
+    console.error('❌ Get videos error:', error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };

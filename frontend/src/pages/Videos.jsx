@@ -13,9 +13,19 @@ const Videos = () => {
 
   const fetchVideos = async () => {
     try {
+      console.log('📥 Fetching videos...');
       const { data } = await api.get('/videos');
+      console.log('✅ Videos fetched:', data.videos?.length || 0, 'videos');
+      
+      if (data.videos?.length > 0) {
+        data.videos.forEach((item, idx) => {
+          console.log(`  ${idx + 1}. ID: ${item._id}, Title: ${item.title}, YouTube ID: ${item.youtubeId || 'none'}`);
+        });
+      }
+      
       setVideos(data.videos || []);
     } catch (err) {
+      console.error('❌ Fetch videos error:', err.message);
       toast.error('Failed to fetch videos');
     }
   };

@@ -16,6 +16,8 @@ const getBusinessId = async (userId) => {
 // Upload image buffer to Cloudinary
 const uploadToCloudinary = (fileBuffer) => {
   return new Promise((resolve, reject) => {
+    console.log('☁️  Uploading product image to Cloudinary...');
+    
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: 'bizcardly/products',
@@ -23,12 +25,29 @@ const uploadToCloudinary = (fileBuffer) => {
       },
       (error, result) => {
         if (error) {
-          reject(error);
+          console.error('❌ Cloudinary error:', error);
+          console.error('   Code:', error.http_code);
+          console.error('   Message:', error.message);
+          
+          if (error.http_code === 401 || error.http_code === 403) {
+            reject(new Error('Cloudinary authentication failed - invalid credentials'));
+          } else if (error.message?.includes('too large')) {
+            reject(new Error('File size too large for Cloudinary'));
+          } else {
+            reject(new Error(`Cloudinary error: ${error.message}`));
+          }
         } else {
+          console.log('✅ Cloudinary upload successful');
+          console.log('   URL:', result.secure_url);
           resolve(result);
         }
       }
     );
+
+    stream.on('error', (error) => {
+      console.error('❌ Stream error:', error);
+      reject(new Error(`Upload stream error: ${error.message}`));
+    });
 
     stream.end(fileBuffer);
   });
@@ -39,10 +58,15 @@ const uploadToCloudinary = (fileBuffer) => {
 // @access Private
 exports.createProduct = async (req, res) => {
   try {
+    console.log('📦 Creating product...');
+    
     const businessId = await getBusinessId(req.user._id);
+    console.log(`🏢 Business ID: ${businessId}`);
+    
     const { name, description, price, category, status } = req.body;
 
     if (!name) {
+      console.error('❌ Product name missing');
       return res.status(400).json({
         success: false,
         message: 'Product name is required',
@@ -53,9 +77,12 @@ exports.createProduct = async (req, res) => {
 
     // Upload image to Cloudinary
     if (req.file) {
+      console.log(`📸 Processing image: ${req.file.originalname} (${req.file.size} bytes)`);
       const result = await uploadToCloudinary(req.file.buffer);
       image = result.secure_url;
     }
+
+    console.log(`📝 Creating product: ${name}, Price: ${price}`);
 
     const product = await Product.create({
       businessId,
@@ -67,13 +94,16 @@ exports.createProduct = async (req, res) => {
       image,
     });
 
+    console.log(`✅ Product created successfully: ${product._id}`);
+
     res.status(201).json({
       success: true,
       message: 'Product created',
       product,
     });
   } catch (error) {
-    console.error('Create product error:', error);
+    console.error('❌ Create product error:', error.message);
+    console.error('Stack trace:', error.stack);
 
     res.status(500).json({
       success: false,
@@ -87,17 +117,35 @@ exports.createProduct = async (req, res) => {
 // @access Private
 exports.getProducts = async (req, res) => {
   try {
+    console.log('📥 Fetching products...');
+    
     const businessId = await getBusinessId(req.user._id);
+    console.log(`🏢 Business ID: ${businessId}`);
 
     const products = await Product.find({
       businessId,
     }).sort({ createdAt: -1 });
+
+    console.log(`✅ Found ${products.length} product(s)`);
+    
+    if (products.length > 0) {
+      products.forEach((product, idx) => {
+        console.log(`  ${idx + 1}. ${product.name} - Image: ${product.image ? '✓' : '✗'}`);
+      });
+    }
 
     res.json({
       success: true,
       products,
     });
   } catch (error) {
+    console.error('❌ Get products error:', error.message);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
     res.status(500).json({
       success: false,
       message: error.message,

@@ -14,9 +14,19 @@ const Services = () => {
 
   const fetchServices = async () => {
     try {
+      console.log('📥 Fetching services...');
       const { data } = await api.get('/services');
+      console.log('✅ Services fetched:', data.services?.length || 0, 'services');
+      
+      if (data.services?.length > 0) {
+        data.services.forEach((item, idx) => {
+          console.log(`  ${idx + 1}. ID: ${item._id}, Name: ${item.name}, Price: ${item.price}`);
+        });
+      }
+      
       setServices(data.services || []);
     } catch (err) {
+      console.error('❌ Fetch services error:', err.message);
       toast.error('Failed to fetch services');
     }
   };
@@ -35,15 +45,22 @@ const Services = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    console.log('📋 Starting service submission');
+    
     try {
+      console.log('📤 Sending request to /services');
       const res = await api.post('/services', formData);
       const result = res.data;
+      
+      console.log('✅ Response received:', result);
       if (!result.success) throw new Error(result.message || 'Failed to save service');
+      
       toast.success(editingService ? 'Service updated!' : 'Service added!');
       setShowModal(false);
       resetForm();
       fetchServices();
     } catch (err) {
+      console.error('❌ Service save error:', err.message);
       toast.error(err.message);
     } finally {
       setLoading(false);
