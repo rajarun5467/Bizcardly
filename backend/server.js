@@ -26,9 +26,13 @@ const videoRoutes = require('./routes/videos');
 const visitorRoutes = require('./routes/visitors');
 
 // Connect to MongoDB
-connectDB().catch((error) => {
-  console.error('Startup database connection failed:', error.message);
-});
+if (typeof connectDB === 'function') {
+  connectDB().catch((error) => {
+    console.error('Startup database connection failed:', error.message);
+  });
+} else {
+  console.error('connectDB is not a function, check db.js exports');
+}
 
 const app = express();
 
@@ -39,12 +43,41 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Middleware
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://bizcardly.vercel.app'],
+const corsOptions = {
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'https://bizcardly.vercel.app',
+      'https://www.bizcardly.vercel.app',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      /^http:\/\/localhost:\d+$/, 
+      /^http:\/\/127\.0\.0\.1:\d+$/
+    ];
+
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const isAllowed = allowedOrigins.some((allowedOrigin) => {
+      if (typeof allowedOrigin === 'string') {
+        return allowedOrigin === origin;
+      }
+      return allowedOrigin.test(origin);
+    });
+
+    if (isAllowed) {
+      return callback(null, true);
+    }
+
+    callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));
