@@ -18,6 +18,13 @@ const cardClass =
 
 const MapPreview = () => null;
 
+const assetUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('/uploads/')) return `${API_BASE_URL.replace('/api', '')}${url}`;
+  return url;
+};
+
 const Profile = () => {
   const { business, refreshBusiness } = useAuth();
   const [editingSection, setEditingSection] = useState(null); // 'business-info', 'contact-info', 'address-info', or null
@@ -166,11 +173,11 @@ const Profile = () => {
         {/* Edit Modal */}
         {showModal && (
           <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
             onClick={() => { setShowModal(false); setEditingSection(null); }}
           >
             <div 
-              className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl animate-in slide-in-from-bottom-4 zoom-in-95 duration-200"
+              className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -395,11 +402,11 @@ const Profile = () => {
 
       {showModal && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
           onClick={() => { setShowModal(false); setEditingSection(null); }}
         >
           <div 
-            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl animate-in slide-in-from-bottom-4 zoom-in-95 duration-200"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={handleSubmit} className="space-y-6">
