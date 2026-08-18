@@ -3,6 +3,17 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { FaUpload, FaSave, FaCreditCard } from 'react-icons/fa';
+import { API_BASE_URL } from '../api/config';
+
+const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
+
+const assetUrl = (path) => {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path) || path.startsWith('data:') || path.startsWith('blob:')) {
+    return path;
+  }
+  return `${API_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;
+};
 
 const Payment = () => {
   const { business, refreshBusiness } = useAuth();
@@ -15,7 +26,7 @@ const Payment = () => {
     if (business) {
       setUpiId(business.upiId || '');
       if (business.paymentQr) {
-        setQrPreview(business.paymentQr);
+        setQrPreview(assetUrl(business.paymentQr));
       }
     }
   }, [business]);

@@ -272,17 +272,27 @@ exports.updateSocialLinks = async (req, res) => {
 // @access Private
 exports.updatePayment = async (req, res) => {
   try {
+    console.log('💳 Updating payment details...');
     const business = await Business.findOne({ userId: req.user._id });
     if (!business) {
       return res.status(404).json({ success: false, message: 'Business not found' });
     }
 
     if (req.body.upiId) business.upiId = req.body.upiId;
-    if (req.file) business.paymentQr = `/uploads/${req.file.filename}`;
+    
+    // Handle QR code upload to Cloudinary
+    if (req.file && req.file.buffer) {
+      console.log('📁 QR code file received:', req.file.originalname);
+      const qrResult = await uploadToCloudinary(req.file.buffer, 'bizcardly/business/payment');
+      business.paymentQr = qrResult.secure_url;
+      console.log('✅ QR code uploaded to Cloudinary:', qrResult.secure_url);
+    }
     
     await business.save();
+    console.log('✅ Payment details updated successfully');
     res.json({ success: true, message: 'Payment details updated', business });
   } catch (error) {
+    console.error('❌ Update payment error:', error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };
