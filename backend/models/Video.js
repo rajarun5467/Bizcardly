@@ -16,6 +16,10 @@ const videoSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Video URL is required'],
     },
+    youtubeId: {
+      type: String,
+      default: '',
+    },
     thumbnail: {
       type: String,
       default: '',

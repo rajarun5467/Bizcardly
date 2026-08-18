@@ -20,6 +20,12 @@ const Videos = () => {
     }
   };
 
+  const getVideoEmbedId = (video) => {
+    if (video.youtubeId) return video.youtubeId;
+    if (video.videoUrl) return getYoutubeId(video.videoUrl);
+    return '';
+  };
+
   useEffect(() => {
     if (user) {
       const token = localStorage.getItem('bizcardly_token');
@@ -97,27 +103,37 @@ const Videos = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {videos.map((video) => (
-          <div key={video._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="aspect-video bg-gray-100">
-              <iframe
-                src={`https://www.youtube.com/embed/${video.youtubeId}`}
-                title={video.title}
-                className="w-full h-full"
-                allowFullScreen
-              />
+        {videos.map((video) => {
+          const embedId = getVideoEmbedId(video);
+
+          return (
+            <div key={video._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="aspect-video bg-gray-100">
+                {embedId ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${embedId}`}
+                    title={video.title}
+                    className="w-full h-full"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">
+                    Invalid video URL
+                  </div>
+                )}
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <h3 className="font-semibold text-gray-800">{video.title}</h3>
+                <button
+                  onClick={() => handleDelete(video._id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                >
+                  <FaTrash />
+                </button>
+              </div>
             </div>
-            <div className="p-4 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-800">{video.title}</h3>
-              <button
-                onClick={() => handleDelete(video._id)}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-              >
-                <FaTrash />
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {videos.length === 0 && (

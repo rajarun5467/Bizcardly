@@ -21,18 +21,25 @@ exports.addVideo = async (req, res) => {
   try {
     console.log('Add video request body:', req.body);
     const businessId = await getBusinessId(req.user._id);
-    const { title, videoUrl } = req.body;
+    const { title, videoUrl, youtubeId } = req.body;
 
     if (!title || !videoUrl) {
       return res.status(400).json({ success: false, message: 'Title and video URL are required' });
     }
 
-    // Auto-generate thumbnail from YouTube ID
-    const ytId = getYouTubeId(videoUrl);
-    console.log('YouTube ID extracted:', ytId);
-    const thumbnail = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '';
+    const extractedYoutubeId = youtubeId || getYouTubeId(videoUrl);
+    console.log('YouTube ID extracted:', extractedYoutubeId);
 
-    const video = await Video.create({ businessId, title, videoUrl, thumbnail });
+    const thumbnail = extractedYoutubeId ? `https://img.youtube.com/vi/${extractedYoutubeId}/hqdefault.jpg` : '';
+
+    const video = await Video.create({
+      businessId,
+      title,
+      videoUrl,
+      youtubeId: extractedYoutubeId,
+      thumbnail,
+    });
+
     console.log('Video created:', video);
     res.status(201).json({ success: true, message: 'Video added', video });
   } catch (error) {

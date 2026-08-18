@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../api/config';
 import {
   FaBuilding, FaEdit, FaEnvelope, FaGlobe, FaImage, FaMapMarkerAlt,
   FaPhone, FaRegTrashAlt, FaSave, FaUpload, FaWhatsapp
@@ -113,7 +114,7 @@ const Profile = () => {
         data.append('profileImage', formData.profileImage);
       }
 
-      const res = await fetch('https://bizcardly.onrender.com/api/business', {
+      const res = await fetch(`${API_BASE_URL}/business`, {
         method: business ? 'PUT' : 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

@@ -1,0 +1,128 @@
+[
+  {
+    "_id": "6a8066d4b1ffcb6cebe12d37",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-15T13:17:08.825Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8066d4b1ffcb6cebe12d3a",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-15T13:17:08.838Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8078312de4bdb54c51211e",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-15T14:31:13.817Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a814d70752cc600c065116e",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-16T05:41:04.294Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a815d8618a7da27252332c6",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-16T06:49:42.564Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8178aa18a7da27252334ef",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-16T08:45:30.073Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8178aa18a7da27252334f1",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-16T08:45:30.075Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8187c818a7da27252336a8",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-16T09:50:00.611Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8187c818a7da27252336aa",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-16T09:50:00.613Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8195f318a7da2725233792",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-16T10:50:27.374Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a81a430b9d26c9e5aa7e1bf",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-16T11:51:12.076Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8297a05e146cb62b92f883",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-17T05:09:52.824Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8297a05e146cb62b92f885",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3",
+    "visitedAt": "2026-08-17T05:09:52.835Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a82ebb14925982641aff5a0",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
+    "visitedAt": "2026-08-17T11:08:33.877Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a82ebb14925982641aff5a4",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
+    "visitedAt": "2026-08-17T11:08:33.894Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8312c46693bab9c8526535",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
+    "visitedAt": "2026-08-17T13:55:16.876Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a8312c46693bab9c8526537",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
+    "visitedAt": "2026-08-17T13:55:16.884Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a83d44069536e6474625442",
+    "businessId": "6a804498b2ffee920c038350",
+    "ipHash": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
+    "visitedAt": "2026-08-18T03:40:48.815Z",
+    "__v": 0
+  }
+]

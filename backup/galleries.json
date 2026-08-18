@@ -1,0 +1,18 @@
+[
+  {
+    "_id": "6a804d630670dcbcad8a7d7f",
+    "businessId": "6a804498b2ffee920c038350",
+    "imageUrl": "/uploads/1786793315688-ChatGPT_Image_Aug_15__2026__04_54_26_PM.png",
+    "createdAt": "2026-08-15T11:28:35.709Z",
+    "updatedAt": "2026-08-15T11:28:35.709Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a804d7b0670dcbcad8a7d86",
+    "businessId": "6a804498b2ffee920c038350",
+    "imageUrl": "/uploads/1786793339691-ChatGPT_Image_Aug_15__2026__04_50_35_PM.png",
+    "createdAt": "2026-08-15T11:28:59.703Z",
+    "updatedAt": "2026-08-15T11:28:59.703Z",
+    "__v": 0
+  }
+]

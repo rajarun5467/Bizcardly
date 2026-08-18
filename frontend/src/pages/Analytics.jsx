@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { FaEye, FaCalendarDay, FaCalendarWeek, FaCalendarAlt } from 'react-icons/fa';
+import { API_BASE_URL } from '../api/config';
 
 const Analytics = () => {
   const [analytics, setAnalytics] = useState(null);
@@ -13,7 +14,7 @@ const Analytics = () => {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('bizcardly_token');
-      const res = await fetch('https://bizcardly.onrender.com/api/analytics', {
+      const res = await fetch(`${API_BASE_URL}/analytics`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

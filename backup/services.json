@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "6a804bceb2ffee920c0383d1",
+    "businessId": "6a804498b2ffee920c038350",
+    "name": "Hair Spa",
+    "image": "",
+    "description": "Deep conditioning hair treatment that nourishes the scalp, repairs damaged hair, and leaves hair smooth, healthy, and shiny.",
+    "price": 499,
+    "category": "",
+    "status": "active",
+    "createdAt": "2026-08-15T11:21:50.105Z",
+    "updatedAt": "2026-08-15T11:21:50.105Z",
+    "__v": 0
+  }
+]

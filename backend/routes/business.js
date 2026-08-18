@@ -10,6 +10,7 @@ router.put('/', protect, uploadFields, updateBusiness);
 router.put('/social', protect, updateSocialLinks);
 router.put('/payment', protect, uploadPayment, updatePayment);
 router.put('/location', protect, updateLocation);
+router.get('/public/:slug', getPublicBusiness); // Public - no auth
 router.get('/slug/:slug', getPublicBusiness); // Public - no auth
 
 module.exports = router;

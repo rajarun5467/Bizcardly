@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../api/config';
 import {
   FaArrowRight, FaBox, FaChartLine, FaCog, FaConciergeBell, FaCreditCard,
   FaEye, FaImages, FaMapMarkerAlt, FaMousePointer, FaQrcode, FaShareAlt,
@@ -25,10 +26,10 @@ const Overview = () => {
       try {
         const token = localStorage.getItem('bizcardly_token');
         const [productsRes, servicesRes, galleryRes, videosRes] = await Promise.all([
-          fetch('https://bizcardly.onrender.com/api/products', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('https://bizcardly.onrender.com/api/services', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('https://bizcardly.onrender.com/api/gallery', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('https://bizcardly.onrender.com/api/videos', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE_URL}/products`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE_URL}/services`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE_URL}/gallery`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE_URL}/videos`, { headers: { Authorization: `Bearer ${token}` } }),
         ]);
 
         const [products, services, gallery, videos] = await Promise.all([

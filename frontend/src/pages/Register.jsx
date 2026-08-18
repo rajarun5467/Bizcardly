@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { FaEnvelope, FaLock, FaUser, FaArrowRight } from 'react-icons/fa';
+import { API_BASE_URL } from '../api/config';
 
 const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
@@ -24,7 +25,7 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      const res = await fetch('https://bizcardly.onrender.com/api/auth/register', {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password, confirmPassword: formData.confirmPassword }),

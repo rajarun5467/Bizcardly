@@ -1,0 +1,43 @@
+[
+  {
+    "_id": "6a804498b2ffee920c038350",
+    "userId": "6a804497b2ffee920c03834d",
+    "businessName": "Hair Cut and Beauty Saloon",
+    "slug": "arun",
+    "category": "",
+    "tagline": "smart hair cutting",
+    "description": "Professional haircut with styling and finishing for a fresh and stylish look.",
+    "about": "Professional haircut with styling and finishing for a fresh and stylish look.",
+    "logo": "/uploads/1786880491749-ChatGPT_Image_Aug_16__2026__05_11_07_PM.png",
+    "profileImage": "/uploads/1786880679776-WhatsApp_Image_2026_08_16_at_5.12.51_PM.jpeg",
+    "phone": "6394518942",
+    "whatsapp": "6394518942",
+    "email": "rajarun8078@gmail.com",
+    "website": "https://haircastle.in/",
+    "address": "Lakhimpur Kheri",
+    "mapUrl": "",
+    "location": {
+      "latitude": "27.946216850051",
+      "longitude": "80.75884395239716",
+      "mapUrl": ""
+    },
+    "socialLinks": {
+      "instagram": "https://www.instagram.com/arun5482raj/",
+      "facebook": "https://www.facebook.com/profile.php?id=100089474301302",
+      "youtube": "",
+      "linkedin": "https://www.linkedin.com/in/arun-raj-504561268/",
+      "twitter": "",
+      "whatsapp": "6394518942",
+      "website": ""
+    },
+    "upiId": "6394518942@axl",
+    "paymentQr": "/uploads/1786877119532-WhatsApp_Image_2026_08_16_at_4.13.47_PM.jpeg",
+    "paymentQR": "",
+    "openingHours": "",
+    "isPublished": true,
+    "createdAt": "2026-08-15T10:51:04.118Z",
+    "updatedAt": "2026-08-16T11:44:39.780Z",
+    "__v": 0,
+    "name": "Hair Cut and Beauty Saloon"
+  }
+]

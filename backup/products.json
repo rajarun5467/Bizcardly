@@ -1,0 +1,28 @@
+[
+  {
+    "_id": "6a81733118a7da2725233430",
+    "businessId": "6a804498b2ffee920c038350",
+    "name": "hair cut",
+    "image": "/uploads/1786868529704-ChatGPT_Image_Aug_15__2026__04_50_35_PM.png",
+    "description": "Premium hair cut",
+    "price": 500,
+    "category": "",
+    "status": "active",
+    "createdAt": "2026-08-16T08:22:09.735Z",
+    "updatedAt": "2026-08-16T08:22:09.735Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a831978ae53da996f516ce8",
+    "businessId": "6a804498b2ffee920c038350",
+    "name": "Smart Hair Cutting",
+    "image": "/uploads/1786976632024-ChatGPT_Image_Aug_15__2026__04_54_26_PM.png",
+    "description": "",
+    "price": 500,
+    "category": "",
+    "status": "active",
+    "createdAt": "2026-08-17T14:23:52.043Z",
+    "updatedAt": "2026-08-17T14:23:52.043Z",
+    "__v": 0
+  }
+]

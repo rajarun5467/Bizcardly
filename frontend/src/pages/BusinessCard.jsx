@@ -5,8 +5,9 @@ import {
   FaWhatsapp, FaFacebook, FaInstagram, FaTwitter, FaLinkedin,
   FaBox, FaConciergeBell, FaImages, FaVideo, FaUserLock
 } from 'react-icons/fa';
+import { API_BASE_URL } from '../api/config';
 
-const API_ORIGIN = 'https://bizcardly.onrender.com';
+const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
 
 const assetUrl = (path) => {
   if (!path) return '';
