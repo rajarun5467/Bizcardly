@@ -264,7 +264,7 @@ const Profile = () => {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 sm:h-32 sm:w-32">
                 {business.logo ? (
-                  <img src={business.logo} alt="Logo" className="h-full w-full object-contain p-2" />
+                  <img src={assetUrl(business.logo)} alt="Logo" className="h-full w-full object-contain p-2" />
                 ) : (
                   <FaBuilding className="text-3xl text-slate-300 sm:text-4xl" />
                 )}
@@ -281,7 +281,7 @@ const Profile = () => {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex h-36 w-36 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8e4ff] ring-1 ring-[#d6d1ff] sm:h-48 sm:w-48">
                 {business.profileImage ? (
-                  <img src={business.profileImage} alt="Profile" className="h-full w-full object-cover" />
+                  <img src={assetUrl(business.profileImage)} alt="Profile" className="h-full w-full object-cover" />
                 ) : (
                   <FaBuilding className="text-4xl text-[#6657f1]/45 sm:text-5xl" />
                 )}

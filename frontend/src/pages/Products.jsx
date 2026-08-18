@@ -3,6 +3,17 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { FaPlus, FaEdit, FaTrash, FaRupeeSign, FaImage } from 'react-icons/fa';
+import { API_BASE_URL } from '../api/config';
+
+const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
+
+const assetUrl = (path) => {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path) || path.startsWith('data:') || path.startsWith('blob:')) {
+    return path;
+  }
+  return `${API_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;
+};
 
 const Products = () => {
   const { user } = useAuth();
@@ -114,7 +125,7 @@ const Products = () => {
           <div key={product._id} className="bg-white rounded-xl shadow-sm overflow-hidden hover-lift transition group">
             {product.image && (
               <div className="relative overflow-hidden h-48 bg-gray-200">
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                <img src={assetUrl(product.image)} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
               </div>
             )}
             <div className="p-4">

@@ -1,11 +1,37 @@
+const cloudinary = require('../config/cloudinary');
 const Product = require('../models/Product');
 const Business = require('../models/Business');
 
 // Helper to get business by userId
 const getBusinessId = async (userId) => {
   const business = await Business.findOne({ userId });
-  if (!business) throw new Error('Business not found');
+
+  if (!business) {
+    throw new Error('Business not found');
+  }
+
   return business._id;
+};
+
+// Upload image buffer to Cloudinary
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'bizcardly/products',
+        resource_type: 'image',
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+
+    stream.end(fileBuffer);
+  });
 };
 
 // @desc   Create product
@@ -16,9 +42,20 @@ exports.createProduct = async (req, res) => {
     const businessId = await getBusinessId(req.user._id);
     const { name, description, price, category, status } = req.body;
 
-    if (!name) return res.status(400).json({ success: false, message: 'Product name is required' });
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Product name is required',
+      });
+    }
 
-    const image = req.file ? `/uploads/${req.file.filename}` : '';
+    let image = '';
+
+    // Upload image to Cloudinary
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+      image = result.secure_url;
+    }
 
     const product = await Product.create({
       businessId,
@@ -30,9 +67,18 @@ exports.createProduct = async (req, res) => {
       image,
     });
 
-    res.status(201).json({ success: true, message: 'Product created', product });
+    res.status(201).json({
+      success: true,
+      message: 'Product created',
+      product,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Create product error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -42,10 +88,20 @@ exports.createProduct = async (req, res) => {
 exports.getProducts = async (req, res) => {
   try {
     const businessId = await getBusinessId(req.user._id);
-    const products = await Product.find({ businessId }).sort({ createdAt: -1 });
-    res.json({ success: true, products });
+
+    const products = await Product.find({
+      businessId,
+    }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      products,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -55,22 +111,61 @@ exports.getProducts = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const businessId = await getBusinessId(req.user._id);
-    const product = await Product.findOne({ _id: req.params.id, businessId });
 
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    const product = await Product.findOne({
+      _id: req.params.id,
+      businessId,
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
 
     const { name, description, price, category, status } = req.body;
-    if (name) product.name = name;
-    if (description !== undefined) product.description = description;
-    if (price !== undefined) product.price = parseFloat(price) || 0;
-    if (category !== undefined) product.category = category;
-    if (status !== undefined) product.status = status;
-    if (req.file) product.image = `/uploads/${req.file.filename}`;
+
+    if (name) {
+      product.name = name;
+    }
+
+    if (description !== undefined) {
+      product.description = description;
+    }
+
+    if (price !== undefined) {
+      product.price = parseFloat(price) || 0;
+    }
+
+    if (category !== undefined) {
+      product.category = category;
+    }
+
+    if (status !== undefined) {
+      product.status = status;
+    }
+
+    // Upload new image to Cloudinary
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+      product.image = result.secure_url;
+    }
 
     await product.save();
-    res.json({ success: true, message: 'Product updated', product });
+
+    res.json({
+      success: true,
+      message: 'Product updated',
+      product,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Update product error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -80,12 +175,29 @@ exports.updateProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
   try {
     const businessId = await getBusinessId(req.user._id);
-    const product = await Product.findOneAndDelete({ _id: req.params.id, businessId });
 
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    const product = await Product.findOneAndDelete({
+      _id: req.params.id,
+      businessId,
+    });
 
-    res.json({ success: true, message: 'Product deleted' });
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Product deleted',
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Delete product error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

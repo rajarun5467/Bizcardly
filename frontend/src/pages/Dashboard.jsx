@@ -7,6 +7,17 @@ import {
   FaCreditCard, FaSignOutAlt, FaBars, FaTimes, FaUser,
   FaBell, FaChevronDown, FaBriefcase
 } from 'react-icons/fa';
+import { API_BASE_URL } from '../api/config';
+
+const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
+
+const assetUrl = (path) => {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path) || path.startsWith('data:') || path.startsWith('blob:')) {
+    return path;
+  }
+  return `${API_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;
+};
 
 const Dashboard = () => {
   const { business, logout } = useAuth();
@@ -46,7 +57,7 @@ const Dashboard = () => {
         <div className="flex items-center gap-3 px-6 py-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-lg shadow-[#5f70ff]/35 overflow-hidden">
             {business?.logo ? (
-              <img src={business.logo} alt="Logo" className="h-full w-full object-contain p-2" />
+              <img src={assetUrl(business.logo)} alt="Logo" className="h-full w-full object-contain p-2" />
             ) : (
               <FaBriefcase className="text-lg text-[#6657f1]" />
             )}
@@ -119,7 +130,7 @@ const Dashboard = () => {
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 overflow-hidden rounded-full bg-white shadow-md ring-2 ring-[#6657f1]/20 p-0.5">
                   {business?.logo ? (
-                    <img src={business.logo} alt="Logo" className="h-full w-full object-contain p-1.5" />
+                    <img src={assetUrl(business.logo)} alt="Logo" className="h-full w-full object-contain p-1.5" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-[#6657f1] to-[#5546dc] text-sm font-black text-white">
                       {(business?.name || 'JD').slice(0, 2).toUpperCase()}

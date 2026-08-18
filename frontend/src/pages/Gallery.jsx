@@ -3,6 +3,17 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { FaPlus, FaTrash, FaImages } from 'react-icons/fa';
+import { API_BASE_URL } from '../api/config';
+
+const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
+
+const assetUrl = (path) => {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path) || path.startsWith('data:') || path.startsWith('blob:')) {
+    return path;
+  }
+  return `${API_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;
+};
 
 const Gallery = () => {
   const { user } = useAuth();
@@ -93,7 +104,7 @@ const Gallery = () => {
         {gallery.map((item) => (
           <div key={item._id} className="relative group overflow-hidden rounded-xl">
             <img
-              src={item.imageUrl}
+              src={assetUrl(item.imageUrl)}
               alt="Gallery"
               className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300 shadow-sm cursor-pointer"
             />
