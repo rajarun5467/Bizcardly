@@ -3,14 +3,21 @@ const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+// Load environment variables from .env file
+const envPath = path.resolve(__dirname, '.env');
+console.log('📁 Loading .env from:', envPath);
+console.log('📁 .env exists:', fs.existsSync(envPath));
+
+require('dotenv').config({ path: envPath });
 
 console.log('🚀 Starting Bizcardly Server...');
 console.log('📋 Environment check:', {
   NODE_ENV: process.env.NODE_ENV,
   PORT: process.env.PORT,
   MONGO_URI: process.env.MONGO_URI ? 'Set' : 'Not set',
-  JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set'
+  JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set',
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Not set',
 });
 
 const { connectDB } = require('./config/db');
