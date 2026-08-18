@@ -8,21 +8,65 @@ import { API_BASE_URL } from '../api/config';
 const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({ score: 0, message: '' });
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const checkPasswordStrength = (password) => {
+    let score = 0;
+    const checks = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
+
+    Object.values(checks).forEach(check => {
+      if (check) score++;
+    });
+
+    let message = '';
+    if (score === 0) message = 'Very weak';
+    else if (score <= 2) message = 'Weak';
+    else if (score <= 3) message = 'Fair';
+    else if (score <= 4) message = 'Good';
+    else message = 'Strong';
+
+    return { score, message, checks };
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'password') {
+      setPasswordStrength(checkPasswordStrength(e.target.value));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Password validation with helpful messages
+    if (formData.password.length < 8) {
+      return toast.error('Password must be at least 8 characters long');
+    }
+    
+    const strength = checkPasswordStrength(formData.password);
+    if (strength.score < 3) {
+      const missingRequirements = [];
+      if (!strength.checks.length) missingRequirements.push('at least 8 characters');
+      if (!strength.checks.uppercase) missingRequirements.push('uppercase letter');
+      if (!strength.checks.lowercase) missingRequirements.push('lowercase letter');
+      if (!strength.checks.number) missingRequirements.push('number');
+      if (!strength.checks.special) missingRequirements.push('special character (!@#$%^&*)');
+      
+      return toast.error(`Password is too weak. Please include: ${missingRequirements.join(', ')}`);
+    }
+    
     if (formData.password !== formData.confirmPassword) {
       return toast.error('Passwords do not match');
     }
-    if (formData.password.length < 6) {
-      return toast.error('Password must be at least 6 characters');
-    }
+    
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -94,7 +138,48 @@ const Register = () => {
                 placeholder="••••••••"
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+            {formData.password && (
+              <div className="mt-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        passwordStrength.score <= 2 ? 'bg-red-500' :
+                        passwordStrength.score <= 3 ? 'bg-yellow-500' :
+                        passwordStrength.score <= 4 ? 'bg-green-400' :
+                        'bg-green-600'
+                      }`}
+                      style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                    />
+                  </div>
+                  <span className={`text-xs font-medium ${
+                    passwordStrength.score <= 2 ? 'text-red-500' :
+                    passwordStrength.score <= 3 ? 'text-yellow-500' :
+                    passwordStrength.score <= 4 ? 'text-green-400' :
+                    'text-green-600'
+                  }`}>
+                    {passwordStrength.message}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p className={passwordStrength.checks.length ? 'text-green-600' : 'text-gray-400'}>
+                    ✓ At least 8 characters
+                  </p>
+                  <p className={passwordStrength.checks.uppercase ? 'text-green-600' : 'text-gray-400'}>
+                    ✓ Uppercase letter (A-Z)
+                  </p>
+                  <p className={passwordStrength.checks.lowercase ? 'text-green-600' : 'text-gray-400'}>
+                    ✓ Lowercase letter (a-z)
+                  </p>
+                  <p className={passwordStrength.checks.number ? 'text-green-600' : 'text-gray-400'}>
+                    ✓ Number (0-9)
+                  </p>
+                  <p className={passwordStrength.checks.special ? 'text-green-600' : 'text-gray-400'}>
+                    ✓ Special character (!@#$%^&*)
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
