@@ -146,12 +146,6 @@ exports.getProducts = async (req, res) => {
     });
   }
 };
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
 
 // @desc   Update product
 // @route  PUT /api/products/:id

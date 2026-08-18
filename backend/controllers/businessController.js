@@ -4,6 +4,38 @@ const Service = require('../models/Service');
 const Gallery = require('../models/Gallery');
 const Video = require('../models/Video');
 const slugify = require('slugify');
+const cloudinary = require('../config/cloudinary');
+
+// Upload file to Cloudinary
+const uploadToCloudinary = (fileBuffer, folder = 'bizcardly/business') => {
+  return new Promise((resolve, reject) => {
+    console.log('☁️  Uploading to Cloudinary...');
+    
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: 'auto',
+      },
+      (error, result) => {
+        if (error) {
+          console.error('❌ Cloudinary error:', error);
+          reject(new Error(`Cloudinary error: ${error.message}`));
+        } else {
+          console.log('✅ Cloudinary upload successful');
+          console.log('   URL:', result.secure_url);
+          resolve(result);
+        }
+      }
+    );
+
+    stream.on('error', (error) => {
+      console.error('❌ Stream error:', error);
+      reject(new Error(`Upload stream error: ${error.message}`));
+    });
+
+    stream.end(fileBuffer);
+  });
+};
 
 // Generate unique slug
 const generateUniqueSlug = async (name, excludeId = null) => {
@@ -75,22 +107,26 @@ exports.updateBusiness = async (req, res) => {
 
       // Handle file uploads for new business
       if (req.files) {
-        if (req.files.logo) {
-          console.log(`📁 Logo: ${req.files.logo[0].filename}`);
-          business.logo = `/uploads/${req.files.logo[0].filename}`;
+        if (req.files.logo && req.files.logo[0]) {
+          console.log(`📁 Logo file received: ${req.files.logo[0].originalname}`);
+          const logoResult = await uploadToCloudinary(req.files.logo[0].buffer, 'bizcardly/business/logos');
+          business.logo = logoResult.secure_url;
         }
-        if (req.files.profileImage) {
-          console.log(`📁 Profile Image: ${req.files.profileImage[0].filename}`);
-          business.profileImage = `/uploads/${req.files.profileImage[0].filename}`;
+        if (req.files.profileImage && req.files.profileImage[0]) {
+          console.log(`📁 Profile Image file received: ${req.files.profileImage[0].originalname}`);
+          const profileResult = await uploadToCloudinary(req.files.profileImage[0].buffer, 'bizcardly/business/profiles');
+          business.profileImage = profileResult.secure_url;
         }
-        if (req.files.paymentQR) {
-          console.log(`📁 Payment QR: ${req.files.paymentQR[0].filename}`);
-          business.paymentQR = `/uploads/${req.files.paymentQR[0].filename}`;
+        if (req.files.paymentQR && req.files.paymentQR[0]) {
+          console.log(`📁 Payment QR file received: ${req.files.paymentQR[0].originalname}`);
+          const qrResult = await uploadToCloudinary(req.files.paymentQR[0].buffer, 'bizcardly/business/payment');
+          business.paymentQR = qrResult.secure_url;
         }
       }
       if (req.file) {
-        console.log(`📁 File: ${req.file.filename}`);
-        business.logo = `/uploads/${req.file.filename}`;
+        console.log(`📁 File received: ${req.file.originalname}`);
+        const fileResult = await uploadToCloudinary(req.file.buffer, 'bizcardly/business/logos');
+        business.logo = fileResult.secure_url;
       }
 
       await business.save();
@@ -162,22 +198,26 @@ exports.updateBusiness = async (req, res) => {
 
     // Handle file uploads
     if (req.files) {
-      if (req.files.logo) {
-        console.log(`📁 Logo: ${req.files.logo[0].filename}`);
-        business.logo = `/uploads/${req.files.logo[0].filename}`;
+      if (req.files.logo && req.files.logo[0]) {
+        console.log(`📁 Logo file received: ${req.files.logo[0].originalname}`);
+        const logoResult = await uploadToCloudinary(req.files.logo[0].buffer, 'bizcardly/business/logos');
+        business.logo = logoResult.secure_url;
       }
-      if (req.files.profileImage) {
-        console.log(`📁 Profile Image: ${req.files.profileImage[0].filename}`);
-        business.profileImage = `/uploads/${req.files.profileImage[0].filename}`;
+      if (req.files.profileImage && req.files.profileImage[0]) {
+        console.log(`📁 Profile Image file received: ${req.files.profileImage[0].originalname}`);
+        const profileResult = await uploadToCloudinary(req.files.profileImage[0].buffer, 'bizcardly/business/profiles');
+        business.profileImage = profileResult.secure_url;
       }
-      if (req.files.paymentQR) {
-        console.log(`📁 Payment QR: ${req.files.paymentQR[0].filename}`);
-        business.paymentQR = `/uploads/${req.files.paymentQR[0].filename}`;
+      if (req.files.paymentQR && req.files.paymentQR[0]) {
+        console.log(`📁 Payment QR file received: ${req.files.paymentQR[0].originalname}`);
+        const qrResult = await uploadToCloudinary(req.files.paymentQR[0].buffer, 'bizcardly/business/payment');
+        business.paymentQR = qrResult.secure_url;
       }
     }
     if (req.file) {
-      console.log(`📁 File: ${req.file.filename}`);
-      business.logo = `/uploads/${req.file.filename}`;
+      console.log(`📁 File received: ${req.file.originalname}`);
+      const fileResult = await uploadToCloudinary(req.file.buffer, 'bizcardly/business/logos');
+      business.logo = fileResult.secure_url;
     }
 
     await business.save();
