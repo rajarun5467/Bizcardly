@@ -31,12 +31,22 @@ const serviceRoutes = require('./routes/services');
 const galleryRoutes = require('./routes/gallery');
 const videoRoutes = require('./routes/videos');
 const visitorRoutes = require('./routes/visitors');
+const superAdminRoutes = require('./routes/superAdmin');
+const supportRoutes = require('./routes/support');
+const subscriptionRoutes = require('./routes/subscription');
 
 // Connect to MongoDB
 if (typeof connectDB === 'function') {
-  connectDB().catch((error) => {
-    console.error('Startup database connection failed:', error.message);
-  });
+  connectDB()
+    .then(() => {
+      const { seedDefaultPlans } = require('./utils/subscriptionUtils');
+      seedDefaultPlans().catch((error) => {
+        console.error('Plan seeding failed:', error.message);
+      });
+    })
+    .catch((error) => {
+      console.error('Startup database connection failed:', error.message);
+    });
 } else {
   console.error('connectDB is not a function, check db.js exports');
 }
@@ -87,6 +97,9 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/visitors', visitorRoutes);
+app.use('/api/superadmin', superAdminRoutes);
+app.use('/api/support', supportRoutes);
+app.use('/api/subscription', subscriptionRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

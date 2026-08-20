@@ -1,5 +1,6 @@
 const Video = require('../models/Video');
 const Business = require('../models/Business');
+const { checkPlanLimit } = require('../utils/subscriptionUtils');
 
 const getBusinessId = async (userId) => {
   const business = await Business.findOne({ userId });
@@ -30,7 +31,13 @@ exports.addVideo = async (req, res) => {
     
     const businessId = await getBusinessId(req.user._id);
     console.log(`🏢 Business ID: ${businessId}`);
-    
+
+    const currentCount = await Video.countDocuments({ businessId });
+    const limitCheck = await checkPlanLimit(req.user._id, 'video', currentCount);
+    if (!limitCheck.allowed) {
+      return res.status(403).json({ success: false, message: limitCheck.message, limitReached: true });
+    }
+
     const { title, videoUrl, youtubeId } = req.body;
 
     if (!title || !videoUrl) {

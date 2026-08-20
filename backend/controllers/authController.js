@@ -2,10 +2,11 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Business = require('../models/Business');
 const slugify = require('slugify');
+const { ensureSubscription } = require('../utils/subscriptionUtils');
 
 // Generate JWT Token
-const generateToken = (id, email) => {
-  return jwt.sign({ id, email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+const generateToken = (id, email, role) => {
+  return jwt.sign({ id, email, role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 // Generate unique slug
@@ -64,14 +65,18 @@ exports.register = async (req, res) => {
     });
     console.log('Business created:', business._id);
 
-    const token = generateToken(user._id, user.email);
+    // Every new user automatically gets a Free subscription
+    await ensureSubscription(user._id);
+    console.log('Free subscription created for user:', user._id);
+
+    const token = generateToken(user._id, user.email, user.role);
     console.log('Token generated');
 
     res.status(201).json({
       success: true,
       message: 'Registration successful',
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -100,6 +105,11 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
+    if (user.isBlocked) {
+      console.log('User is blocked:', email);
+      return res.status(403).json({ success: false, message: 'Your account has been blocked. Please contact support.' });
+    }
+
     console.log('Comparing password...');
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
@@ -107,14 +117,14 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
-    const token = generateToken(user._id, user.email);
+    const token = generateToken(user._id, user.email, user.role);
     console.log('Login successful for:', email);
 
     res.json({
       success: true,
       message: 'Login successful',
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -132,7 +142,7 @@ exports.getMe = async (req, res) => {
 
     res.json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, isBlocked: user.isBlocked },
       business,
     });
   } catch (error) {

@@ -104,6 +104,10 @@ const businessSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isSuspended: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

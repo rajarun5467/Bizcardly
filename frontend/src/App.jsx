@@ -16,11 +16,36 @@ import Location from './pages/Location';
 import Analytics from './pages/Analytics';
 import QRCode from './pages/QRCode';
 import BusinessCard from './pages/BusinessCard';
+import Home from './pages/Home';
+import SuperAdminLogin from './pages/superadmin/SuperAdminLogin';
+import SuperAdminLayout from './pages/superadmin/SuperAdminLayout';
+import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
+import SuperAdminUsers from './pages/superadmin/SuperAdminUsers';
+import SuperAdminUserDetails from './pages/superadmin/SuperAdminUserDetails';
+import SuperAdminBusinesses from './pages/superadmin/SuperAdminBusinesses';
+import SuperAdminBusinessDetails from './pages/superadmin/SuperAdminBusinessDetails';
+import SuperAdminAnalytics from './pages/superadmin/SuperAdminAnalytics';
+import SuperAdminModeration from './pages/superadmin/SuperAdminModeration';
+import SuperAdminSettings from './pages/superadmin/SuperAdminSettings';
+import SuperAdminActivityLogs from './pages/superadmin/SuperAdminActivityLogs';
+import SuperAdminSubscriptions from './pages/superadmin/SuperAdminSubscriptions';
+import SuperAdminSupport from './pages/superadmin/SuperAdminSupport';
+import Support from './pages/Support';
+import Subscription from './pages/Subscription';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   return user ? children : <Navigate to="/login" />;
+}
+
+function SuperAdminRoute({ children }) {
+  const savedUser = localStorage.getItem('superadmin_user');
+  if (savedUser) {
+    const user = JSON.parse(savedUser);
+    if (user.role === 'superadmin') return children;
+  }
+  return <Navigate to="/superadmin/login" />;
 }
 
 function ScrollToTop() {
@@ -60,8 +85,34 @@ function App() {
           <Route path="location" element={<Location />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="qrcode" element={<QRCode />} />
+          <Route path="support" element={<Support />} />
+          <Route path="subscription" element={<Subscription />} />
         </Route>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Home />} />
+
+        {/* SuperAdmin Routes */}
+        <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+        <Route
+          path="/superadmin"
+          element={
+            <SuperAdminRoute>
+              <SuperAdminLayout />
+            </SuperAdminRoute>
+          }
+        >
+          <Route index element={<Navigate to="/superadmin/dashboard" replace />} />
+          <Route path="dashboard" element={<SuperAdminDashboard />} />
+          <Route path="users" element={<SuperAdminUsers />} />
+          <Route path="users/:id" element={<SuperAdminUserDetails />} />
+          <Route path="businesses" element={<SuperAdminBusinesses />} />
+          <Route path="businesses/:id" element={<SuperAdminBusinessDetails />} />
+          <Route path="analytics" element={<SuperAdminAnalytics />} />
+          <Route path="moderation" element={<SuperAdminModeration />} />
+          <Route path="settings" element={<SuperAdminSettings />} />
+          <Route path="subscriptions" element={<SuperAdminSubscriptions />} />
+          <Route path="support" element={<SuperAdminSupport />} />
+          <Route path="activity-logs" element={<SuperAdminActivityLogs />} />
+        </Route>
       </Routes>
     </>
   );

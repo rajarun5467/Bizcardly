@@ -5,6 +5,7 @@ const Gallery = require('../models/Gallery');
 const Video = require('../models/Video');
 const slugify = require('slugify');
 const cloudinary = require('../config/cloudinary');
+const { hasFeature } = require('../utils/subscriptionUtils');
 
 // Upload file to Cloudinary
 const uploadToCloudinary = (fileBuffer, folder = 'bizcardly/business') => {
@@ -345,17 +346,22 @@ exports.getPublicBusiness = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Business not found' });
     }
 
+    if (business.isSuspended) {
+      return res.status(403).json({ success: false, message: 'This business card has been suspended.', suspended: true });
+    }
+
     // Fetch all associated data
-    const [products, services, gallery, videos] = await Promise.all([
+    const [products, services, gallery, videos, removeBranding] = await Promise.all([
       Product.find({ businessId: business._id, status: 'active' }),
       Service.find({ businessId: business._id, status: 'active' }),
       Gallery.find({ businessId: business._id }).sort({ createdAt: -1 }),
       Video.find({ businessId: business._id }).sort({ createdAt: -1 }),
+      hasFeature(business.userId, 'remove_branding'),
     ]);
 
     res.json({
       success: true,
-      business,
+      business: { ...business.toObject(), removeBranding },
       products,
       services,
       gallery,

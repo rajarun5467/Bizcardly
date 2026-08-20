@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "test:server": "node server.test.js",
+    "test:seed": "node seed-superadmin.test.js"
   },
   "engines": {
     "node": ">=18.0.0"

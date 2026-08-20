@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { FaPlus, FaTrash, FaVideo, FaYoutube } from 'react-icons/fa';
+import UsageIndicator from '../components/UsageIndicator';
 
 const Videos = () => {
   const { user } = useAuth();
@@ -10,6 +11,16 @@ const Videos = () => {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ title: '', url: '' });
   const [loading, setLoading] = useState(false);
+  const [usage, setUsage] = useState(null);
+
+  const fetchUsage = async () => {
+    try {
+      const { data } = await api.get('/subscription/usage');
+      setUsage(data.usage);
+    } catch (err) {
+      console.error('Failed to fetch usage:', err.message);
+    }
+  };
 
   const fetchVideos = async () => {
     try {
@@ -41,6 +52,7 @@ const Videos = () => {
       const token = localStorage.getItem('bizcardly_token');
       if (token) {
         fetchVideos();
+        fetchUsage();
       } else {
         console.log('Videos: No token found');
       }
@@ -102,6 +114,7 @@ const Videos = () => {
       
       console.log('🔄 Fetching updated videos...');
       await fetchVideos();
+      fetchUsage();
     } catch (err) {
       console.error('❌ Video submission error:', {
         message: err.message,
@@ -126,6 +139,7 @@ const Videos = () => {
       await api.delete(`/videos/${id}`);
       toast.success('Video deleted!');
       fetchVideos();
+      fetchUsage();
     } catch (err) {
       toast.error('Failed to delete video');
     }
@@ -140,12 +154,15 @@ const Videos = () => {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+          disabled={usage?.videos?.limit != null && usage.videos.limit >= 0 && usage.videos.used >= usage.videos.limit}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FaPlus />
           Add Video
         </button>
       </div>
+
+      <UsageIndicator usage={usage} resourceKey="videos" label="Videos" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {videos.map((video) => {

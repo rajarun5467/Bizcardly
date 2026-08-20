@@ -4,6 +4,7 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { FaPlus, FaTrash, FaImages } from 'react-icons/fa';
 import { API_BASE_URL } from '../api/config';
+import UsageIndicator from '../components/UsageIndicator';
 
 const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
 
@@ -22,6 +23,16 @@ const Gallery = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [usage, setUsage] = useState(null);
+
+  const fetchUsage = async () => {
+    try {
+      const { data } = await api.get('/subscription/usage');
+      setUsage(data.usage);
+    } catch (err) {
+      console.error('Failed to fetch usage:', err.message);
+    }
+  };
 
   const fetchGallery = async () => {
     try {
@@ -47,6 +58,7 @@ const Gallery = () => {
       const token = localStorage.getItem('bizcardly_token');
       if (token) {
         fetchGallery();
+        fetchUsage();
       } else {
         console.log('Gallery: No token found');
       }
@@ -92,10 +104,11 @@ const Gallery = () => {
       setSelectedFiles([]);
       setPreviews([]);
       fetchGallery();
+      fetchUsage();
     } catch (err) {
       console.error('❌ Upload error:', err.message);
       console.error('Full error:', err);
-      toast.error(err.message || 'Upload failed');
+      toast.error(err.response?.data?.message || err.message || 'Upload failed');
     } finally {
       setLoading(false);
     }
@@ -107,6 +120,7 @@ const Gallery = () => {
       await api.delete(`/gallery/${id}`);
       toast.success('Image deleted!');
       fetchGallery();
+      fetchUsage();
     } catch (err) {
       toast.error('Failed to delete image');
     }
@@ -121,12 +135,15 @@ const Gallery = () => {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition hover-lift shadow-lg"
+          disabled={usage?.gallery?.limit != null && usage.gallery.limit >= 0 && usage.gallery.used >= usage.gallery.limit}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition hover-lift shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FaPlus />
           Upload Photos
         </button>
       </div>
+
+      <UsageIndicator usage={usage} resourceKey="gallery" label="Gallery images" />
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-staggered">
         {gallery.map((item) => {

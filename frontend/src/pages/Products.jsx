@@ -4,6 +4,7 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { FaPlus, FaEdit, FaTrash, FaRupeeSign, FaImage } from 'react-icons/fa';
 import { API_BASE_URL } from '../api/config';
+import UsageIndicator from '../components/UsageIndicator';
 
 const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
 
@@ -23,6 +24,16 @@ const Products = () => {
   const [formData, setFormData] = useState({ name: '', price: '', description: '', image: null });
   const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(false);
+  const [usage, setUsage] = useState(null);
+
+  const fetchUsage = async () => {
+    try {
+      const { data } = await api.get('/subscription/usage');
+      setUsage(data.usage);
+    } catch (err) {
+      console.error('Failed to fetch usage:', err.message);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -47,6 +58,7 @@ const Products = () => {
     console.log('Products useEffect - user:', user);
     if (user) {
       fetchProducts();
+      fetchUsage();
     }
   }, [user]);
 
@@ -87,9 +99,10 @@ const Products = () => {
       setShowModal(false);
       resetForm();
       fetchProducts();
+      fetchUsage();
     } catch (err) {
       console.error('❌ Product save error:', err.message);
-      toast.error(err.message);
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -113,6 +126,7 @@ const Products = () => {
       await api.delete(`/products/${id}`);
       toast.success('Product deleted!');
       fetchProducts();
+      fetchUsage();
     } catch (err) {
       toast.error('Failed to delete product');
     }
@@ -133,12 +147,15 @@ const Products = () => {
         </div>
         <button
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition hover-lift shadow-lg"
+          disabled={usage?.products?.limit != null && usage.products.limit >= 0 && usage.products.used >= usage.products.limit}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition hover-lift shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FaPlus />
           Add Product
         </button>
       </div>
+
+      <UsageIndicator usage={usage} resourceKey="products" label="Products" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-staggered">
         {products.map((product) => {

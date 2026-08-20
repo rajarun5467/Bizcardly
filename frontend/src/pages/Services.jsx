@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { FaPlus, FaEdit, FaTrash, FaRupeeSign, FaConciergeBell } from 'react-icons/fa';
+import UsageIndicator from '../components/UsageIndicator';
 
 const Services = () => {
   const { user } = useAuth();
@@ -11,6 +12,16 @@ const Services = () => {
   const [editingService, setEditingService] = useState(null);
   const [formData, setFormData] = useState({ name: '', price: '', description: '' });
   const [loading, setLoading] = useState(false);
+  const [usage, setUsage] = useState(null);
+
+  const fetchUsage = async () => {
+    try {
+      const { data } = await api.get('/subscription/usage');
+      setUsage(data.usage);
+    } catch (err) {
+      console.error('Failed to fetch usage:', err.message);
+    }
+  };
 
   const fetchServices = async () => {
     try {
@@ -36,6 +47,7 @@ const Services = () => {
       const token = localStorage.getItem('bizcardly_token');
       if (token) {
         fetchServices();
+        fetchUsage();
       } else {
         console.log('Services: No token found');
       }
@@ -59,9 +71,10 @@ const Services = () => {
       setShowModal(false);
       resetForm();
       fetchServices();
+      fetchUsage();
     } catch (err) {
       console.error('❌ Service save error:', err.message);
-      toast.error(err.message);
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -83,6 +96,7 @@ const Services = () => {
       await api.delete(`/services/${id}`);
       toast.success('Service deleted!');
       fetchServices();
+      fetchUsage();
     } catch (err) {
       toast.error('Failed to delete service');
     }
@@ -102,12 +116,15 @@ const Services = () => {
         </div>
         <button
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition hover-lift shadow-lg"
+          disabled={usage?.services?.limit != null && usage.services.limit >= 0 && usage.services.used >= usage.services.limit}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition hover-lift shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FaPlus />
           Add Service
         </button>
       </div>
+
+      <UsageIndicator usage={usage} resourceKey="services" label="Services" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-staggered">
         {services.map((service) => (

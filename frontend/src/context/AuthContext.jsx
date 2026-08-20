@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('bizcardly_user');
     setUser(null);
     setBusiness(null);
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   const refreshBusiness = async () => {

@@ -503,6 +503,14 @@ const BusinessCard = () => {
               </button>
             </div>
 
+            {!business.removeBranding && (
+              <div className="mt-3 text-center">
+                <span className="text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-white/50">
+                  Powered by BizCardly
+                </span>
+              </div>
+            )}
+
           </div>
         </div>
         </div>

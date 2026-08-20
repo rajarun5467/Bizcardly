@@ -1,5 +1,6 @@
 const Service = require('../models/Service');
 const Business = require('../models/Business');
+const { checkPlanLimit } = require('../utils/subscriptionUtils');
 
 // Helper to get business by userId
 const getBusinessId = async (userId) => {
@@ -17,7 +18,13 @@ exports.createService = async (req, res) => {
     
     const businessId = await getBusinessId(req.user._id);
     console.log(`🏢 Business ID: ${businessId}`);
-    
+
+    const currentCount = await Service.countDocuments({ businessId });
+    const limitCheck = await checkPlanLimit(req.user._id, 'service', currentCount);
+    if (!limitCheck.allowed) {
+      return res.status(403).json({ success: false, message: limitCheck.message, limitReached: true });
+    }
+
     const { name, description, price, category, status } = req.body;
 
     if (!name) {

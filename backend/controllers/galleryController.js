@@ -1,6 +1,7 @@
 const cloudinary = require('../config/cloudinary');
 const Gallery = require('../models/Gallery');
 const Business = require('../models/Business');
+const { checkPlanLimit } = require('../utils/subscriptionUtils');
 
 const getBusinessId = async (userId) => {
   const business = await Business.findOne({ userId });
@@ -68,6 +69,12 @@ exports.uploadGallery = async (req, res) => {
 
     const businessId = await getBusinessId(req.user._id);
     console.log(`🏢 Business ID: ${businessId}`);
+
+    const currentCount = await Gallery.countDocuments({ businessId });
+    const limitCheck = await checkPlanLimit(req.user._id, 'gallery', currentCount + req.files.length - 1);
+    if (!limitCheck.allowed) {
+      return res.status(403).json({ success: false, message: limitCheck.message, limitReached: true });
+    }
 
     const galleryItems = await Promise.all(
       req.files.map(async (file, index) => {

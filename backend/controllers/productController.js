@@ -1,6 +1,7 @@
 const cloudinary = require('../config/cloudinary');
 const Product = require('../models/Product');
 const Business = require('../models/Business');
+const { checkPlanLimit } = require('../utils/subscriptionUtils');
 
 // Helper to get business by userId
 const getBusinessId = async (userId) => {
@@ -62,7 +63,13 @@ exports.createProduct = async (req, res) => {
     
     const businessId = await getBusinessId(req.user._id);
     console.log(`🏢 Business ID: ${businessId}`);
-    
+
+    const currentCount = await Product.countDocuments({ businessId });
+    const limitCheck = await checkPlanLimit(req.user._id, 'product', currentCount);
+    if (!limitCheck.allowed) {
+      return res.status(403).json({ success: false, message: limitCheck.message, limitReached: true });
+    }
+
     const { name, description, price, category, status } = req.body;
 
     if (!name) {
