@@ -959,7 +959,7 @@ exports.getSettings = async (req, res) => {
 // @access SuperAdmin
 exports.updateSettings = async (req, res) => {
   try {
-    const { platformName, registrationsEnabled, maintenanceMode, maxUploadSize, allowedFileTypes, defaultCardTemplate, paymentUpiId } = req.body;
+    const { platformName, registrationsEnabled, maintenanceMode, maxUploadSize, allowedFileTypes, defaultCardTemplate, paymentUpiId, removeQr } = req.body;
 
     let settings = await getSettings();
 
@@ -976,6 +976,10 @@ exports.updateSettings = async (req, res) => {
     if (req.file && req.file.buffer) {
       const qrResult = await uploadToCloudinary(req.file.buffer, 'bizcardly/platform/payment');
       settings.paymentQrCode = qrResult.secure_url;
+    }
+
+    if (removeQr === 'true' || removeQr === true) {
+      settings.paymentQrCode = '';
     }
 
     await settings.save();

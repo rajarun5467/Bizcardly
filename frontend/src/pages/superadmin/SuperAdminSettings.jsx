@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaSave, FaCog, FaUserPlus, FaUpload, FaWrench, FaTools, FaQrcode } from 'react-icons/fa';
+import { FaSave, FaCog, FaUserPlus, FaUpload, FaWrench, FaTools, FaQrcode, FaTrash, FaCheckCircle, FaEdit } from 'react-icons/fa';
 import { API_BASE_URL } from '../../api/config';
 import toast from 'react-hot-toast';
 
@@ -24,12 +24,66 @@ const SuperAdminSettings = () => {
   const [saving, setSaving] = useState(false);
   const [qrFile, setQrFile] = useState(null);
   const [qrPreview, setQrPreview] = useState('');
+  const [uploadingQr, setUploadingQr] = useState(false);
+  const [qrUploaded, setQrUploaded] = useState(false);
 
   const handleQrSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
       setQrFile(file);
       setQrPreview(URL.createObjectURL(file));
+      setQrUploaded(false);
+    }
+  };
+
+  const handleQrUpload = async () => {
+    if (!qrFile) {
+      toast.error('Please select a QR code image first');
+      return;
+    }
+    setUploadingQr(true);
+    try {
+      const token = localStorage.getItem('superadmin_token');
+      const formData = new FormData();
+      formData.append('paymentQr', qrFile);
+      const res = await fetch(`${API_BASE_URL}/superadmin/settings`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      toast.success('QR Code uploaded successfully!');
+      setSettings(data.settings);
+      setQrFile(null);
+      setQrPreview('');
+      setQrUploaded(true);
+      setTimeout(() => setQrUploaded(false), 3000);
+    } catch (err) {
+      toast.error(err.message || 'Failed to upload QR code');
+    } finally {
+      setUploadingQr(false);
+    }
+  };
+
+  const handleQrRemove = async () => {
+    try {
+      const token = localStorage.getItem('superadmin_token');
+      const formData = new FormData();
+      formData.append('removeQr', 'true');
+      const res = await fetch(`${API_BASE_URL}/superadmin/settings`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      toast.success('QR Code removed');
+      setSettings(data.settings);
+      setQrFile(null);
+      setQrPreview('');
+    } catch (err) {
+      toast.error(err.message || 'Failed to remove QR code');
     }
   };
 
@@ -185,19 +239,78 @@ const SuperAdminSettings = () => {
           This QR code and UPI ID will be shown to users when they request a plan upgrade.
         </p>
         <div className="flex flex-col sm:flex-row gap-6 items-start">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-36 h-36 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden bg-slate-50">
+          {/* QR Code Upload Section */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-40 h-40 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden bg-slate-50 relative">
               {qrPreview || settings.paymentQrCode ? (
                 <img src={qrPreview || settings.paymentQrCode} alt="Payment QR" className="w-full h-full object-contain" />
               ) : (
                 <FaQrcode className="text-slate-300 text-4xl" />
               )}
+              {qrUploaded && (
+                <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
+                  <FaCheckCircle className="text-green-600 text-3xl" />
+                </div>
+              )}
             </div>
-            <label className="cursor-pointer text-xs font-medium text-indigo-600 hover:text-indigo-700">
-              <input type="file" accept="image/*" onChange={handleQrSelect} className="hidden" />
-              {settings.paymentQrCode ? 'Change QR Code' : 'Upload QR Code'}
-            </label>
+
+            {/* Upload / Change / Remove buttons */}
+            <div className="flex flex-col items-center gap-2">
+              {!qrPreview && !settings.paymentQrCode && (
+                <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition">
+                  <FaUpload />
+                  Upload QR Code
+                  {/* eslint-disable-next-line */}
+                  <input type="file" accept="image/*" onChange={handleQrSelect} className="hidden" />
+                </label>
+              )}
+
+              {qrPreview && !qrUploaded && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleQrUpload}
+                    disabled={uploadingQr}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-700 transition disabled:opacity-50"
+                  >
+                    {uploadingQr ? (
+                      <><span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"></span> Uploading...</>
+                    ) : (
+                      <><FaUpload /> Confirm Upload</>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => { setQrFile(null); setQrPreview(''); }}
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium hover:bg-slate-200 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {(settings.paymentQrCode || qrUploaded) && !qrPreview && (
+                <div className="flex gap-2">
+                  <label className="cursor-pointer inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-600 text-xs font-medium hover:bg-indigo-100 transition">
+                    <FaEdit /> Change
+                    <input type="file" accept="image/*" onChange={handleQrSelect} className="hidden" />
+                  </label>
+                  <button
+                    onClick={handleQrRemove}
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100 transition"
+                  >
+                    <FaTrash /> Remove
+                  </button>
+                </div>
+              )}
+
+              {qrUploaded && (
+                <p className="text-xs text-green-600 font-medium flex items-center gap-1">
+                  <FaCheckCircle /> QR Code uploaded successfully!
+                </p>
+              )}
+            </div>
           </div>
+
+          {/* UPI ID Section */}
           <div className="flex-1 w-full">
             <label className="block text-sm font-medium text-slate-700 mb-1">UPI ID</label>
             <input
@@ -208,6 +321,11 @@ const SuperAdminSettings = () => {
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-slate-900 text-sm"
             />
             <p className="text-xs text-slate-400 mt-1">Users will pay here and submit their UPI ref + screenshot for approval.</p>
+            <div className="mt-3 p-3 bg-amber-50 rounded-lg">
+              <p className="text-xs text-amber-700">
+                <strong>Note:</strong> UPI ID saves with the "Save Settings" button below. QR code has its own upload button.
+              </p>
+            </div>
           </div>
         </div>
       </div>
