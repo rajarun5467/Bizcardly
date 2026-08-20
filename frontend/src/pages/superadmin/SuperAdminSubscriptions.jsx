@@ -457,27 +457,27 @@ const SuperAdminSubscriptions = () => {
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5 flex-wrap">
                       {sub.plan !== 'Pro' && (
-                        <button onClick={() => setModal({ type: 'assign', userId: sub.userId?._id, plan: 'Pro', name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-purple-50 text-purple-600 text-xs font-medium hover:bg-purple-100" title="Upgrade to Pro">
+                        <button onClick={() => setModal({ type: 'assign', userId: sub.user?._id, plan: 'Pro', name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-purple-50 text-purple-600 text-xs font-medium hover:bg-purple-100" title="Upgrade to Pro">
                           <FaCrown className="inline" /> Upgrade
                         </button>
                       )}
                       {sub.plan !== 'Free' && (
-                        <button onClick={() => setModal({ type: 'assign', userId: sub.userId?._id, plan: 'Free', name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100" title="Downgrade to Free">
+                        <button onClick={() => setModal({ type: 'assign', userId: sub.user?._id, plan: 'Free', name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-slate-50 text-slate-600 text-xs font-medium hover:bg-slate-100" title="Downgrade to Free">
                           <FaGift className="inline" /> Downgrade
                         </button>
                       )}
                       {sub.plan === 'Pro' && sub.status === 'active' && (
-                        <button onClick={() => setModal({ type: 'extend', userId: sub.userId?._id, name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100" title="Extend">
+                        <button onClick={() => setModal({ type: 'extend', userId: sub.user?._id, name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100" title="Extend">
                           <FaPlus className="inline" /> Extend
                         </button>
                       )}
                       {sub.status === 'active' && (
-                        <button onClick={() => setModal({ type: 'cancel', userId: sub.userId?._id, name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100" title="Cancel">
+                        <button onClick={() => setModal({ type: 'cancel', userId: sub.user?._id, name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100" title="Cancel">
                           <FaBan className="inline" /> Cancel
                         </button>
                       )}
                       {sub.status !== 'active' && (
-                        <button onClick={() => setModal({ type: 'reactivate', userId: sub.userId?._id, name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-green-50 text-green-600 text-xs font-medium hover:bg-green-100" title="Reactivate">
+                        <button onClick={() => setModal({ type: 'reactivate', userId: sub.user?._id, name: sub.user?.name })} className="px-2.5 py-1.5 rounded-lg bg-green-50 text-green-600 text-xs font-medium hover:bg-green-100" title="Reactivate">
                           <FaCheckCircle className="inline" /> Reactivate
                         </button>
                       )}

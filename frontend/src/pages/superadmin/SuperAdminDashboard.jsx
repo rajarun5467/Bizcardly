@@ -209,32 +209,6 @@ const SuperAdminDashboard = () => {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-slate-800">Recent Activity</h3>
-          <Link to="/superadmin/activity-logs" className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-            View all <FaArrowRight className="text-xs" />
-          </Link>
-        </div>
-        {data.recentActivity.length === 0 ? (
-          <p className="text-slate-400 text-center py-8">No recent activity</p>
-        ) : (
-          <div className="space-y-2">
-            {data.recentActivity.map((log) => (
-              <div key={log._id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                  <FaClock className="text-xs" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-700">{log.description}</p>
-                  <p className="text-xs text-slate-400">{new Date(log.createdAt).toLocaleString()}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 };
