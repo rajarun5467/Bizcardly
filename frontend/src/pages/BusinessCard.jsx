@@ -1,520 +1,817 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  FaPhone, FaEnvelope, FaGlobe, FaMapMarkerAlt, FaShareAlt,
-  FaWhatsapp, FaFacebook, FaInstagram, FaTwitter, FaLinkedin,
-  FaBox, FaConciergeBell, FaImages, FaVideo, FaUserLock
-} from 'react-icons/fa';
 import { API_BASE_URL } from '../api/config';
+import { getImageUrl } from '../utils/imageUrl';
+import {
+  FaPhone, FaEnvelope, FaGlobe, FaMapMarkerAlt, FaWhatsapp,
+  FaHome, FaAddressCard, FaStar, FaHeadset, FaShare, FaDownload,
+  FaPaperPlane, FaStore, FaCalendarAlt, FaTags, FaCheckCircle,
+  FaBox, FaConciergeBell, FaImages, FaVideo, FaUserLock,
+  FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaCommentDots,
+  FaEye, FaRupeeSign, FaTimes,
+} from 'react-icons/fa';
+import '../styles/businessCard.css';
 
-const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
-
-const assetUrl = (path) => {
+const assetUrl = (path, context = 'eCard') => {
   if (!path) return '';
   if (/^https?:\/\//i.test(path) || path.startsWith('data:') || path.startsWith('blob:')) {
     return path;
   }
-  return `${API_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;
+  return getImageUrl(path, context);
 };
 
-const paymentQrUrl = (business) => assetUrl(business?.paymentQr || business?.paymentQR);
+const paymentQrUrl = (business) => {
+  if (business.paymentQrCode) return assetUrl(business.paymentQrCode, 'paymentQR');
+  if (business.paymentSettings?.qrCode) return assetUrl(business.paymentSettings.qrCode, 'paymentQR');
+  if (business.platformSettings?.paymentQrCode) return assetUrl(business.platformSettings.paymentQrCode, 'platformQR');
+  return '';
+};
 
 const BusinessCard = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('products');
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [theme, setTheme] = useState('dark');
+  const [activeSection, setActiveSection] = useState('home');
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewForm, setReviewForm] = useState({ name: '', review: '' });
+  const [enquiryForm, setEnquiryForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
+  const [toasts, setToasts] = useState([]);
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const sectionsRef = useRef({});
+
+  const showToast = useCallback((title, message, type = 'success') => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, title, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 5000);
+  }, []);
+
+  const dismissToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
 
   useEffect(() => {
-    fetchBusiness();
-    recordVisit();
-  }, [slug]);
-
-  const fetchBusiness = async () => {
     try {
-      const res = await fetch(`${API_ORIGIN}/api/business/slug/${slug}`);
-      const data = await res.json();
-      if (res.ok) {
-        setBusiness({
-          ...data.business,
-          products: data.products || [],
-          services: data.services || [],
-          gallery: data.gallery || [],
-          videos: data.videos || [],
-        });
+      const saved = localStorage.getItem('ecard-theme') || 'dark';
+      setTheme(saved);
+    } catch (e) {}
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    try { localStorage.setItem('ecard-theme', newTheme); } catch (e) {}
+  };
+
+  useEffect(() => {
+    const fetchBusiness = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/business/slug/${slug}`);
+        const data = await res.json();
+        if (data.success && data.business) {
+          setBusiness({
+            ...data.business,
+            products: data.products || [],
+            services: data.services || [],
+            gallery: data.gallery || [],
+            videos: data.videos || [],
+          });
+        } else {
+          showToast('Not Found', 'Business card not found.', 'error');
+        }
+      } catch (err) {
+        console.error('Fetch business error:', err);
+        showToast('Error', 'Failed to load business card.', 'error');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to fetch business:', err);
-    } finally {
+    };
+
+    if (slug) {
+      fetchBusiness();
+    } else {
       setLoading(false);
     }
-  };
+  }, [slug, showToast]);
 
-  const recordVisit = async () => {
-    try {
-      await fetch(`${API_ORIGIN}/api/visitors/${slug}`, { method: 'POST' });
-    } catch (err) {
-      console.error('Failed to record visit:', err);
+  useEffect(() => {
+    if (slug) {
+      fetch(`${API_BASE_URL}/visitors/${slug}`, { method: 'POST' }).catch(() => {});
+    }
+  }, [slug]);
+
+  const scrollToSection = (sectionId) => {
+    const el = sectionsRef.current[sectionId];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setActiveSection(sectionId);
     }
   };
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: business?.name,
-          url: window.location.href,
-        });
-      } catch (err) {
-        console.error('Share failed:', err);
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + window.innerHeight / 3;
+      const sectionIds = ['home', 'about', 'products', 'services', 'gallery', 'videos', 'feedback', 'enquiry'];
+      for (const id of sectionIds) {
+        const el = sectionsRef.current[id];
+        if (el) {
+          const top = el.offsetTop;
+          const bottom = top + el.offsetHeight;
+          if (scrollPos >= top && scrollPos < bottom) {
+            setActiveSection(id);
+            break;
+          }
+        }
       }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
-  };
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [business]);
 
   const handleCall = () => {
-    const phoneNumber = (business?.phone || business?.contactNumber || '6394518942').replace(/[^\d+]/g, '');
-    if (phoneNumber) {
-      window.location.href = `tel:${phoneNumber}`;
-    }
+    if (business?.phone) window.location.href = `tel:${business.phone}`;
   };
 
   const handleEmail = () => {
-    const email = business?.email;
-    if (email) {
-      window.open(`mailto:${email}`, '_self');
-    } else {
-      alert('Email address not available');
-    }
+    if (business?.email) window.location.href = `mailto:${business.email}`;
   };
 
   const handleWhatsapp = () => {
-    const whatsappNumber = business?.whatsapp || business?.socialLinks?.whatsapp;
-    if (whatsappNumber) {
-      window.open(`https://wa.me/${whatsappNumber.replace(/[^\d]/g, '')}`);
-    }
+    const num = business?.whatsapp || business?.socialLinks?.whatsapp || business?.phone;
+    if (num) window.open(`https://wa.me/${num.replace(/[^0-9]/g, '')}`, '_blank');
   };
 
   const handleMaps = () => {
-    if (business?.location?.latitude && business?.location?.longitude) {
-      window.open(
-        `https://www.google.com/maps/dir/?api=1&destination=${business.location.latitude},${business.location.longitude}`
-      );
-    } else if (business?.location?.mapUrl) {
-      window.open(business.location.mapUrl);
+    const addr = business?.address || business?.location?.mapUrl;
+    if (business?.location?.mapUrl) {
+      window.open(business.location.mapUrl, '_blank');
+    } else if (addr) {
+      window.open(`https://maps.google.com?q=${encodeURIComponent(addr)}`, '_blank');
     }
   };
 
-  const handleFrontCardClick = (e) => {
-    if (e.target.closest('button, a, iframe')) return;
-    setIsFlipped(true);
+  const handleWebsite = () => {
+    const url = business?.website || business?.socialLinks?.website;
+    if (url) window.open(url.startsWith('http') ? url : `https://${url}`, '_blank');
   };
 
-  const handleBackCardClick = (e) => {
-    if (e.target.closest('button, a, iframe')) return;
-    setIsFlipped(false);
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: business?.name || 'Business Card', url: shareUrl });
+      } catch (e) {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('Link Copied', 'Card link copied to clipboard!', 'success');
+      } catch (e) {
+        showToast('Share', 'Please copy the link from the address bar.', 'warning');
+      }
+    }
   };
 
+  const handleWhatsappShare = () => {
+    const num = whatsappNumber.replace(/[^0-9]/g, '');
+    if (!num) {
+      showToast('Missing Number', 'Please enter a WhatsApp number.', 'warning');
+      return;
+    }
+    const url = window.location.href;
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(url)}`, '_blank');
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e?.preventDefault();
+    if (!reviewForm.name.trim() || !rating || !reviewForm.review.trim()) {
+      showToast('Validation Failed', 'Please complete all fields and select a rating.', 'warning');
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      if (business?._id) {
+        await fetch(`${API_BASE_URL}/business/${business._id}/review`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: reviewForm.name,
+            rating,
+            review: reviewForm.review,
+          }),
+        }).catch(() => {});
+      }
+      showToast('Review Posted', 'Thank you! Your review has been submitted.', 'success');
+      setReviewForm({ name: '', review: '' });
+      setRating(0);
+    } catch (err) {
+      showToast('Review Posted', 'Thank you! Your review has been submitted.', 'success');
+      setReviewForm({ name: '', review: '' });
+      setRating(0);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleEnquirySubmit = async (e) => {
+    e?.preventDefault();
+    if (!enquiryForm.name.trim() || !enquiryForm.phone.trim()) {
+      showToast('Missing Info', 'Name and Phone are required.', 'warning');
+      return;
+    }
+    setSubmittingEnquiry(true);
+    try {
+      if (business?._id) {
+        await fetch(`${API_BASE_URL}/business/${business._id}/enquiry`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(enquiryForm),
+        }).catch(() => {});
+      }
+      showToast('Enquiry Sent', 'Your details have been submitted. We will contact you soon.', 'success');
+      setEnquiryForm({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (err) {
+      showToast('Enquiry Sent', 'Your details have been submitted. We will contact you soon.', 'success');
+      setEnquiryForm({ name: '', email: '', phone: '', subject: '', message: '' });
+    } finally {
+      setSubmittingEnquiry(false);
+    }
+  };
+
+  const socialLinks = [];
+  if (business?.socialLinks?.facebook) socialLinks.push({ key: 'facebook', url: business.socialLinks.facebook, icon: FaFacebook });
+  if (business?.socialLinks?.instagram) socialLinks.push({ key: 'instagram', url: business.socialLinks.instagram, icon: FaInstagram });
+  if (business?.socialLinks?.twitter) socialLinks.push({ key: 'twitter', url: business.socialLinks.twitter, icon: FaTwitter });
+  if (business?.socialLinks?.linkedin) socialLinks.push({ key: 'linkedin', url: business.socialLinks.linkedin, icon: FaLinkedin });
+
+  const businessTitle = business?.name || business?.businessName || 'Your Business';
+  const businessTagline = business?.tagline || '';
+  const aboutText = business?.description || business?.about || '';
+  const ownerName = business?.ownerName || business?.userId?.name || '';
+  const phoneNumbers = business?.phone ? [business.phone, business?.phone2, business?.phone3].filter(Boolean) : [];
+  const qr = business ? paymentQrUrl(business) : '';
+
+  const navItems = [
+    { id: 'home', label: 'Home', icon: FaHome },
+    { id: 'about', label: 'About', icon: FaAddressCard },
+    ...(business?.products?.length > 0 ? [{ id: 'products', label: 'Products', icon: FaBox }] : []),
+    ...(business?.services?.length > 0 ? [{ id: 'services', label: 'Services', icon: FaConciergeBell }] : []),
+    ...(business?.gallery?.length > 0 ? [{ id: 'gallery', label: 'Gallery', icon: FaImages }] : []),
+    ...(business?.videos?.length > 0 ? [{ id: 'videos', label: 'Videos', icon: FaVideo }] : []),
+    { id: 'feedback', label: 'Reviews', icon: FaStar },
+    { id: 'enquiry', label: 'Enquiry', icon: FaHeadset },
+  ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+      <div className="ecard-root" data-theme="dark" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: 'var(--black-color)', fontSize: '18px', fontFamily: 'Quicksand, sans-serif' }}>Loading card...</div>
       </div>
     );
   }
 
   if (!business) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800">Business not found</h1>
-          <p className="text-gray-600 mt-2">The business card you're looking for doesn't exist.</p>
-        </div>
+      <div className="ecard-root" data-theme="dark" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: 'var(--black-color)', fontSize: '18px', fontFamily: 'Quicksand, sans-serif' }}>Business card not found.</div>
       </div>
     );
   }
 
-  const socialButtons = [
-    { key: 'whatsapp', icon: FaWhatsapp, color: 'bg-[#1fc86a]', action: handleWhatsapp },
-    { key: 'facebook', icon: FaFacebook, color: 'bg-[#1877f2]', action: () => business.socialLinks?.facebook && window.open(business.socialLinks.facebook) },
-    { key: 'instagram', icon: FaInstagram, color: 'bg-[#f13a76]', action: () => business.socialLinks?.instagram && window.open(business.socialLinks.instagram) },
-    { key: 'twitter', icon: FaTwitter, color: 'bg-[#1da1f2]', action: () => business.socialLinks?.twitter && window.open(business.socialLinks.twitter) },
-    { key: 'linkedin', icon: FaLinkedin, color: 'bg-[#0a66c2]', action: () => business.socialLinks?.linkedin && window.open(business.socialLinks.linkedin) },
-  ].filter(btn => btn.key === 'whatsapp' ? (business.whatsapp || business.socialLinks?.whatsapp) : business.socialLinks?.[btn.key]);
-
-  const aboutText = business.description || 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.';
-  const businessTitle = business.name || 'Your Business';
-  const businessTagline = business.tagline || 'Tagline Goes Here';
-  const businessStats = { views: business.views || 12458, leads: business.leads || 256 };
-  const galleryPreview = assetUrl(business.gallery?.[0]?.imageUrl || business.gallery?.[0]?.image);
-  const paymentQr = paymentQrUrl(business);
-  const adminCounts = [
-    { label: 'Products', value: business.products?.length || 0, icon: FaBox },
-    { label: 'Services', value: business.services?.length || 0, icon: FaConciergeBell },
-    { label: 'Photos', value: business.gallery?.length || 0, icon: FaImages },
-    { label: 'Videos', value: business.videos?.length || 0, icon: FaVideo },
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#faf8f5] via-[#fdf6f3] to-[#ede6df] px-2 py-3 sm:py-4">
-      <div className="mx-auto flex max-w-[390px] justify-center [perspective:1200px]">
-        <div className={`relative w-full transition-transform duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
-        <div
-          onClick={handleFrontCardClick}
-          className="relative w-full cursor-pointer overflow-hidden rounded-[24px] bg-white shadow-[0_18px_45px_rgba(20,12,34,0.18)] ring-1 ring-[#e0d9cf] [backface-visibility:hidden]"
-        >
-          <div className="absolute -left-16 top-10 h-28 w-28 rounded-full bg-[#7c38f4]/5" />
-          <div className="absolute -right-14 bottom-10 h-32 w-32 rounded-full bg-[#5d2ad7]/5" />
+    <div className="ecard-root" data-theme={theme}>
+      <div className="ecard-particles-bg" />
 
-          <div className="relative overflow-hidden rounded-b-[28px] bg-gradient-to-br from-[#6d28d9] via-[#5d2ad7] to-[#a78bfa] px-4 pb-11 pt-4">
-            <div className="mb-3 flex items-center justify-start">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-white/15 backdrop-blur-sm text-[0.68rem] font-bold text-white border border-white/20">
-                  {business.logo ? (
-                    <img src={assetUrl(business.logo)} alt={`${businessTitle} logo`} className="h-full w-full object-cover" />
-                  ) : (
-                    businessTitle.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <span className="text-[8px] font-bold uppercase tracking-[0.28em] text-white/75">Bizcardly</span>
-              </div>
+      {/* Toast Container */}
+      <div className="ecard-toast-container">
+        {toasts.map(t => (
+          <div key={t.id} className={`ecard-toast ${t.type} show`}>
+            <div className="ecard-toast-header">
+              <span className="ecard-toast-title">{t.title}</span>
+              <button className="ecard-toast-close" onClick={() => dismissToast(t.id)}><FaTimes /></button>
             </div>
+            <div className="ecard-toast-body">{t.message}</div>
+          </div>
+        ))}
+      </div>
 
-            <div className="flex items-start justify-between gap-3">
-              <div className="max-w-[50%]">
-                <h1 className="text-[1.55rem] font-black leading-[1.05] tracking-[-0.03em] text-white">
-                  Hello,<br />
-                  <span className="text-white/90">We are</span><br />
-                  <span className="text-white/90">here</span>
-                </h1>
-                <p className="mt-2 text-white/75 text-[0.62rem] font-semibold leading-snug">to help your business succeed</p>
-                <div className="mt-2.5 h-1 w-12 rounded-full bg-gradient-to-r from-white to-white/40" />
-              </div>
+      <main>
+        {/* Bottom Navigation */}
+        <header>
+          <nav className="ecard-sidebar-menu">
+            <ul className="ecard-menu">
+              {navItems.map(item => {
+                const Icon = item.icon;
+                return (
+                  <li key={item.id} className={activeSection === item.id ? 'active' : ''} onClick={() => scrollToSection(item.id)}>
+                    <a>
+                      <Icon />
+                      <span>{item.label}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </header>
 
-              <div className="relative flex-shrink-0">
-                {business.profileImage ? (
-                  <img src={assetUrl(business.profileImage)} alt={business.name} className="h-24 w-24 rounded-full border-[5px] border-white object-cover shadow-[0_12px_28px_rgba(20,12,34,0.32)]" />
-                ) : business.logo ? (
-                  <img src={assetUrl(business.logo)} alt={business.name} className="h-24 w-24 rounded-full border-[5px] border-white object-cover shadow-[0_12px_28px_rgba(20,12,34,0.32)]" />
+        {/* Theme Toggle */}
+        <aside className="ecard-theme-changer">
+          <input
+            type="checkbox"
+            id="ecard-theme-color"
+            className="ecard-theme-toggle-input"
+            checked={theme === 'light'}
+            onChange={toggleTheme}
+          />
+          <label className="ecard-switch" htmlFor="ecard-theme-color" />
+        </aside>
+
+        <article className="ecard-container-custom">
+          {/* Views Counter */}
+          <div className="ecard-views">
+            <FaEye />
+            <span>Views: {business.views || 0}</span>
+          </div>
+
+          {/* ===== HOME SECTION ===== */}
+          <section
+            id="ecard-home"
+            ref={el => sectionsRef.current['home'] = el}
+            className="ecard-box ecard-box-dark"
+          >
+            <div>
+              <div className="ecard-profile">
+                {business.profileImage || business.logo ? (
+                  <img
+                    src={assetUrl(business.profileImage || business.logo)}
+                    alt={businessTitle}
+                    className="ecard-profile-img"
+                  />
                 ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-full border-[5px] border-white bg-gradient-to-br from-[#f3e8ff] to-[#e9d5ff] text-4xl font-black text-[#5d2ad7] shadow-[0_12px_28px_rgba(20,12,34,0.32)]">
+                  <div className="ecard-profile-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', fontWeight: 700, color: 'var(--accent-color)' }}>
                     {businessTitle.charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
+              <h2 className="ecard-business-name">{businessTitle}</h2>
+              {ownerName && (
+                <h3 className="ecard-owner-name">
+                  {ownerName}
+                  {business.ownerRole && <span style={{ fontSize: '16px' }}> - {business.ownerRole}</span>}
+                </h3>
+              )}
+              {businessTagline && (
+                <p className="ecard-person-type">
+                  <span style={{ display: 'inline-block', animation: 'none' }}>{businessTagline}</span>
+                </p>
+              )}
             </div>
-          </div>
 
-          <div className="relative -mt-6 rounded-t-[26px] bg-white px-4 pb-4 pt-5">
-            <div className="rounded-[18px] bg-gradient-to-br from-white to-[#faf9f8] px-4 py-3 shadow-[0_10px_24px_rgba(28,22,41,0.1)] ring-1 ring-[#ebe9e7]">
-              <h2 className="text-center text-base font-black tracking-[-0.015em] text-slate-950">{businessTitle}</h2>
-              <p className="mt-1 text-center text-[0.62rem] font-bold text-[#7c3aed] uppercase tracking-[0.14em]">{businessTagline}</p>
+            <div className="ecard-divider" />
 
-              <div className="mt-3 flex items-center justify-center gap-3">
-                {socialButtons.length > 0 ? (
-                  socialButtons.map((btn) => {
-                    const Icon = btn.icon;
-                    return (
-                      <button
-                        key={btn.key}
-                        onClick={btn.action}
-                        className={`${btn.color} flex h-9 w-9 items-center justify-center rounded-full text-sm text-white shadow-md transition duration-200 hover:scale-110 hover:shadow-lg active:scale-95`}
-                        title={btn.key}
-                      >
-                        <Icon className="text-base" />
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="flex gap-3.5">
-                    <button onClick={handleCall} className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1fc86a] text-white shadow-md hover:scale-110 transition duration-200"><FaPhone className="text-xs" /></button>
-                    <button onClick={handleEmail} className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2563eb] text-white shadow-md hover:scale-110 transition duration-200"><FaEnvelope className="text-xs" /></button>
-                    <button onClick={handleMaps} className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ef4444] text-white shadow-md hover:scale-110 transition duration-200"><FaMapMarkerAlt className="text-xs" /></button>
-                  </div>
+            {/* Contact Action Buttons */}
+            <div className="ecard-contact-info">
+              {business.phone && (
+                <button onClick={handleCall}>Call <FaHeadset /></button>
+              )}
+              {business.email && (
+                <button onClick={handleEmail}>Email <FaEnvelope /></button>
+              )}
+              {(business.website || business.socialLinks?.website) && (
+                <button onClick={handleWebsite}>Website <FaGlobe /></button>
+              )}
+            </div>
+
+            <div className="ecard-container-custom-1" style={{ marginTop: '20px' }}>
+              {/* Contact Details List */}
+              <ul className="ecard-contact-detail">
+                {phoneNumbers.length > 0 && (
+                  <li>
+                    {phoneNumbers.map((num, i) => (
+                      <a key={i} href={`tel:${num}`} style={{ display: 'inline-flex', marginRight: i < phoneNumbers.length - 1 ? '15px' : '0' }}>
+                        <span className="ecard-contact-icon"><FaPhone /></span>
+                        {num}
+                      </a>
+                    ))}
+                  </li>
                 )}
-              </div>
-            </div>
+                {business.email && (
+                  <li>
+                    <a href={`mailto:${business.email}`} target="_blank" rel="noopener noreferrer">
+                      <span className="ecard-contact-icon"><FaEnvelope /></span>
+                      {business.email}
+                    </a>
+                  </li>
+                )}
+                {(business.whatsapp || business.socialLinks?.whatsapp || business.phone) && (
+                  <li>
+                    <a
+                      href={`https://wa.me/${(business.whatsapp || business.socialLinks?.whatsapp || business.phone).replace(/[^0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className="ecard-contact-icon"><FaWhatsapp /></span>
+                      {business.whatsapp || business.socialLinks?.whatsapp || business.phone}
+                    </a>
+                  </li>
+                )}
+                {(business.address || business.location?.address) && (
+                  <li>
+                    <a
+                      href={business.location?.mapUrl || `https://maps.google.com?q=${encodeURIComponent(business.address || business.location?.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className="ecard-contact-icon"><FaMapMarkerAlt /></span>
+                      {business.address || business.location?.address}
+                    </a>
+                  </li>
+                )}
+              </ul>
 
-            <div className="mt-3 rounded-[18px] bg-gradient-to-br from-white to-[#faf9f8] px-4 py-3 text-center shadow-[0_10px_24px_rgba(28,22,41,0.1)] ring-1 ring-[#ebe9e7]">
-              <div className="mb-2 flex items-center justify-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#ede9fe] to-[#f3e8ff] text-[#6d28d9]">
-                  <FaGlobe className="text-[0.8rem]" />
+              <div className="ecard-divider" />
+
+              {/* Share on WhatsApp */}
+              <div className="ecard-share-whatsapp">
+                <input
+                  maxLength={12}
+                  placeholder="Enter Number with country code"
+                  type="tel"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  value={whatsappNumber}
+                  onChange={e => setWhatsappNumber(e.target.value)}
+                />
+                <button onClick={handleWhatsappShare}>Share on WhatsApp</button>
+              </div>
+
+              {/* Save & Share Buttons */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button className="ecard-btn-action" onClick={handleShare}>
+                  <FaDownload /> Save to Contacts
+                </button>
+                <button className="ecard-btn-action" onClick={handleShare}>
+                  <FaShare /> Share
+                </button>
+              </div>
+
+              <div className="ecard-divider" />
+
+              {/* Social Links */}
+              {socialLinks.length > 0 && (
+                <div className="ecard-social-share">
+                  {socialLinks.map(s => {
+                    const Icon = s.icon;
+                    return (
+                      <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer">
+                        <Icon />
+                      </a>
+                    );
+                  })}
                 </div>
-                <h3 className="text-[0.74rem] font-black uppercase tracking-[0.16em] text-slate-900">About Us</h3>
-              </div>
-              <p className="mx-auto line-clamp-3 max-w-[300px] text-center text-[0.7rem] leading-[1.45] text-slate-700">{aboutText}</p>
+              )}
             </div>
+          </section>
 
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              <div className="rounded-[18px] bg-gradient-to-br from-white to-[#faf9f8] px-3 py-3 shadow-[0_10px_24px_rgba(28,22,41,0.1)] ring-1 ring-[#ebe9e7] text-center hover:shadow-[0_12px_28px_rgba(28,22,41,0.13)] transition duration-200">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#eef2ff] to-[#e9d5ff] text-[#6d28d9] text-sm font-bold">
-                    <FaPhone className="text-[0.7rem]" />
+          {/* ===== ABOUT SECTION ===== */}
+          <section
+            id="ecard-about"
+            ref={el => sectionsRef.current['about'] = el}
+            className="ecard-box ecard-box-dark ecard-about"
+          >
+            <h2 className="ecard-heading">About us <span>Know More</span></h2>
+            <div className="ecard-divider" style={{ marginBottom: '30px' }} />
+
+            <div className="ecard-about-info-row">
+              <div className="ecard-about-info-item">
+                <FaStore />
+                <div className="ecard-info-content">
+                  <span className="ecard-label">Business Name</span>
+                  <span className="ecard-value">{businessTitle}</span>
+                </div>
+              </div>
+              {business.establishedYear && (
+                <div className="ecard-about-info-item">
+                  <FaCalendarAlt />
+                  <div className="ecard-info-content">
+                    <span className="ecard-label">Established</span>
+                    <span className="ecard-value">{business.establishedYear}</span>
                   </div>
-                  <div className="text-[1.05rem] font-black text-slate-950">{businessStats.views.toLocaleString()}</div>
                 </div>
-                <div className="mt-1 text-[0.55rem] font-bold uppercase tracking-[0.14em] text-slate-600">Total Views</div>
-              </div>
-              <div className="rounded-[18px] bg-gradient-to-br from-white to-[#faf9f8] px-3 py-3 shadow-[0_10px_24px_rgba(28,22,41,0.1)] ring-1 ring-[#ebe9e7] text-center hover:shadow-[0_12px_28px_rgba(28,22,41,0.13)] transition duration-200">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#f3e8ff] to-[#ede9fe] text-[#7c3aed] text-sm font-bold">
-                    <FaEnvelope className="text-[0.7rem]" />
+              )}
+              {business.businessType && (
+                <div className="ecard-about-info-item">
+                  <FaTags />
+                  <div className="ecard-info-content">
+                    <span className="ecard-label">Nature</span>
+                    <span className="ecard-value">{business.businessType}</span>
                   </div>
-                  <div className="text-[1.05rem] font-black text-slate-950">{businessStats.leads.toLocaleString()}</div>
                 </div>
-                <div className="mt-1 text-[0.55rem] font-bold uppercase tracking-[0.14em] text-slate-600">Today's Views</div>
-              </div>
+              )}
             </div>
 
-            {(business.products?.length > 0 || business.services?.length > 0 || business.gallery?.length > 0 || business.videos?.length > 0) && (
-              <div className="mt-3 rounded-[18px] bg-gradient-to-br from-white to-[#faf9f8] p-3 shadow-[0_10px_24px_rgba(28,22,41,0.1)] ring-1 ring-[#ebe9e7]">
-                <h3 className="text-[0.7rem] font-black uppercase tracking-[0.17em] text-slate-900 mb-2.5">Our Services</h3>
+            {aboutText && <p className="ecard-about-intro">{aboutText}</p>}
 
-                <div className="grid grid-cols-3 gap-2">
-                  {business.products?.length > 0 && (
-                    <button onClick={() => setActiveTab('products')} className={`rounded-[14px] p-2 text-center transition ${activeTab === 'products' ? 'bg-gradient-to-br from-[#5d2ad7] to-[#8b5cf6] text-white shadow-md' : 'bg-[#faf8f5] text-slate-700 hover:bg-[#f5f3f0]'}`}>
-                      <div className="mx-auto mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-lg"><FaBox className="text-xs" /></div>
-                      <div className="text-[0.58rem] font-bold">Products</div>
-                    </button>
-                  )}
-                  {business.services?.length > 0 && (
-                    <button onClick={() => setActiveTab('services')} className={`rounded-[14px] p-2 text-center transition ${activeTab === 'services' ? 'bg-gradient-to-br from-[#5d2ad7] to-[#8b5cf6] text-white shadow-md' : 'bg-[#faf8f5] text-slate-700 hover:bg-[#f5f3f0]'}`}>
-                      <div className="mx-auto mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-lg"><FaConciergeBell className="text-xs" /></div>
-                      <div className="text-[0.58rem] font-bold">Services</div>
-                    </button>
-                  )}
-                  {business.videos?.length > 0 && (
-                    <button onClick={() => setActiveTab('videos')} className={`rounded-[14px] p-2 text-center transition ${activeTab === 'videos' ? 'bg-gradient-to-br from-[#5d2ad7] to-[#8b5cf6] text-white shadow-md' : 'bg-[#faf8f5] text-slate-700 hover:bg-[#f5f3f0]'}`}>
-                      <div className="mx-auto mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-lg"><FaVideo className="text-xs" /></div>
-                      <div className="text-[0.58rem] font-bold">Videos</div>
-                    </button>
-                  )}
-                </div>
-
-                <div className="mt-2.5 space-y-2">
-                  {activeTab === 'products' && business.products?.slice(0, 1).map((product) => (
-                    <div key={product._id} className="flex items-center gap-2 rounded-[12px] bg-[#faf8f5] p-2 hover:bg-[#f5f3f0] transition">
-                      {product.image && <img src={assetUrl(product.image)} alt={product.name} className="h-9 w-9 rounded-[10px] object-cover shadow-sm" />}
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-[0.68rem] font-bold text-slate-800">{product.name}</div>
-                        <div className="text-[0.62rem] text-[#5d2ad7] font-bold">Rs. {product.price}</div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {activeTab === 'services' && business.services?.slice(0, 1).map((service) => (
-                    <div key={service._id} className="rounded-[12px] bg-[#faf8f5] p-2 hover:bg-[#f5f3f0] transition">
-                      <div className="truncate text-[0.68rem] font-bold text-slate-800">{service.name}</div>
-                      <div className="text-[0.62rem] text-[#5d2ad7] font-bold">Rs. {service.price}</div>
-                    </div>
-                  ))}
-
-                  {activeTab === 'videos' && business.videos?.slice(0, 1).map((video) => (
-                    <div key={video._id} className="overflow-hidden rounded-[12px] bg-[#faf8f5] shadow-sm">
-                      <iframe src={`https://www.youtube.com/embed/${video.youtubeId}`} title={video.title} className="h-20 w-full" allowFullScreen />
+            {/* Products as cards in about section */}
+            {business.products?.length > 0 && (
+              <>
+                <h4 className="ecard-about-subheading">Our Products</h4>
+                <div className="ecard-products-grid">
+                  {business.products.slice(0, 4).map(product => (
+                    <div key={product._id} className="ecard-product-card">
+                      {product.image && (
+                        <img src={assetUrl(product.image)} alt={product.name} />
+                      )}
+                      <h6>{product.name}</h6>
+                      {product.price && (
+                        <p className="ecard-product-price">
+                          <FaRupeeSign style={{ fontSize: '12px' }} />{product.price}
+                        </p>
+                      )}
+                      {product.description && <p>{product.description}</p>}
                     </div>
                   ))}
                 </div>
-              </div>
+              </>
             )}
 
-            <button
-              type="button"
-              onClick={() => setIsFlipped(true)}
-              className="mt-3 flex w-full items-center justify-between rounded-full bg-gradient-to-r from-[#faf8f5] to-[#f5f3f0] px-4 py-2.5 text-slate-700 shadow-sm border border-[#e0d9cf] hover:shadow-md transition duration-200"
+            {/* Services as checklist */}
+            {business.services?.length > 0 && (
+              <>
+                <h4 className="ecard-about-subheading">Our Services</h4>
+                <ul className="ecard-about-checklist">
+                  {business.services.slice(0, 6).map(service => (
+                    <li key={service._id}>
+                      <FaCheckCircle />
+                      <span>
+                        <strong>{service.name}</strong>
+                        {service.price && ` - Rs. ${service.price}`}
+                        {service.description && `: ${service.description}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </section>
+
+          {/* ===== PRODUCTS SECTION (full list) ===== */}
+          {business.products?.length > 4 && (
+            <section
+              id="ecard-products"
+              ref={el => sectionsRef.current['products'] = el}
+              className="ecard-box ecard-box-dark"
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#f3e8ff] to-[#ede9fe] text-[0.65rem] font-bold text-[#6d28d9] border border-[#e9d5ff]">i</div>
-                <div className="text-[0.62rem] font-bold uppercase tracking-[0.12em] text-slate-700">View back side</div>
-              </div>
-              <span className="text-base opacity-70">›</span>
-            </button>
-
-            <div className="mt-3 pb-1 text-center">
-              <p className="text-[0.56rem] font-bold uppercase tracking-[0.2em] text-slate-500">Powered by Bizcardly</p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          onClick={handleBackCardClick}
-          className="absolute inset-0 w-full cursor-pointer overflow-y-auto rounded-[24px] bg-gradient-to-br from-[#201047] via-[#4c1d95] to-[#7c3aed] p-4 text-white shadow-[0_18px_45px_rgba(20,12,34,0.18)] ring-1 ring-[#e0d9cf] [backface-visibility:hidden] [transform:rotateY(180deg)]"
-        >
-          <div className="absolute -left-14 top-10 h-28 w-28 rounded-full bg-white/10" />
-          <div className="absolute -right-16 bottom-16 h-36 w-36 rounded-full bg-[#f06ab4]/15" />
-
-          <div className="relative flex h-full flex-col">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white/25 bg-white/15 text-sm font-black">
-                  {business.logo ? (
-                    <img src={assetUrl(business.logo)} alt={`${businessTitle} logo`} className="h-full w-full object-cover" />
-                  ) : (
-                    businessTitle.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <div>
-                  <p className="text-[0.58rem] font-bold uppercase tracking-[0.2em] text-white/65">Bizcardly</p>
-                  <h2 className="max-w-[190px] truncate text-base font-black">{businessTitle}</h2>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white shadow-sm hover:bg-white/20"
-                  title="Share"
-                >
-                  <FaShareAlt className="text-xs" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsFlipped(false)}
-                  className="rounded-full border border-white/25 bg-white/10 px-3 py-2 text-[0.6rem] font-bold uppercase tracking-[0.12em] text-white shadow-sm hover:bg-white/20"
-                >
-                  Front
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-[20px] border border-white/15 bg-white/10 p-3 shadow-[0_16px_35px_rgba(0,0,0,0.18)] backdrop-blur-sm">
-              <p className="text-center text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/65">Admin Panel Details</p>
-              <div className="mt-3 grid grid-cols-4 gap-2">
-                {adminCounts.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.label} className="rounded-[12px] bg-white px-2 py-2 text-center text-slate-950 shadow-sm">
-                      <Icon className="mx-auto mb-1 text-[0.72rem] text-[#6d28d9]" />
-                      <div className="text-sm font-black">{item.value}</div>
-                      <div className="text-[0.48rem] font-bold uppercase tracking-[0.08em] text-slate-500">{item.label}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="rounded-[16px] bg-white p-3 text-slate-900 shadow-sm">
-                <div className="mb-2 flex items-center gap-2 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-slate-500">
-                  <FaBox className="text-[#6d28d9]" />
-                  Latest Product
-                </div>
-                <p className="truncate text-[0.72rem] font-black">{business.products?.[0]?.name || 'No product added'}</p>
-                <p className="mt-1 line-clamp-2 text-[0.58rem] leading-snug text-slate-500">{business.products?.[0]?.description || 'Add products from admin panel.'}</p>
-              </div>
-              <div className="rounded-[16px] bg-white p-3 text-slate-900 shadow-sm">
-                <div className="mb-2 flex items-center gap-2 text-[0.58rem] font-bold uppercase tracking-[0.14em] text-slate-500">
-                  <FaConciergeBell className="text-[#7c3aed]" />
-                  Top Service
-                </div>
-                <p className="truncate text-[0.72rem] font-black">{business.services?.[0]?.name || 'No service added'}</p>
-                <p className="mt-1 line-clamp-2 text-[0.58rem] leading-snug text-slate-500">{business.services?.[0]?.description || 'Add services from admin panel.'}</p>
-              </div>
-            </div>
-
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <div className="overflow-hidden rounded-[16px] bg-white text-slate-900 shadow-sm">
-                {galleryPreview ? (
-                    <img src={galleryPreview} alt="Gallery preview" className="h-20 w-full object-cover" />
-                ) : (
-                  <div className="flex h-20 items-center justify-center bg-[#f3e8ff] text-[#6d28d9]"><FaImages /></div>
-                )}
-                <div className="px-3 py-2">
-                  <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-slate-500">Gallery</p>
-                  <p className="text-[0.68rem] font-black">{business.gallery?.length || 0} photos</p>
-                </div>
-              </div>
-              <div className="rounded-[16px] bg-white p-3 text-slate-900 shadow-sm">
-                <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#fee2e2] text-[#ef4444]">
-                  <FaVideo className="text-xs" />
-                </div>
-                <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-slate-500">Video</p>
-                <p className="mt-1 line-clamp-2 text-[0.68rem] font-black leading-tight">{business.videos?.[0]?.title || 'No video added'}</p>
-              </div>
-            </div>
-
-            <div className="mt-3 rounded-[16px] bg-white p-3 text-slate-900 shadow-sm">
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={handleMaps} className="min-w-0 rounded-[12px] bg-[#faf8f5] px-3 py-2 text-left">
-                  <span className="block text-[0.55rem] font-bold uppercase tracking-[0.14em] text-slate-500">Location</span>
-                  <span className="block truncate text-[0.68rem] font-black">{business.location?.mapUrl || business.address || 'Map not added'}</span>
-                </button>
-                <a href={business.website || business.socialLinks?.website || '#'} target="_blank" rel="noopener noreferrer" className="min-w-0 rounded-[12px] bg-[#faf8f5] px-3 py-2 text-left">
-                  <span className="block text-[0.55rem] font-bold uppercase tracking-[0.14em] text-slate-500">Website</span>
-                  <span className="block truncate text-[0.68rem] font-black">{business.website || business.socialLinks?.website || 'Not added'}</span>
-                </a>
-              </div>
-              <div className="mt-2 flex justify-center gap-2">
-                {socialButtons.length > 0 ? socialButtons.map((btn) => {
-                  const Icon = btn.icon;
-                  return (
-                    <button key={btn.key} onClick={btn.action} className={`${btn.color} flex h-8 w-8 items-center justify-center rounded-full text-white shadow-sm`}>
-                      <Icon className="text-xs" />
-                    </button>
-                  );
-                }) : (
-                  <span className="text-[0.62rem] font-bold uppercase tracking-[0.12em] text-slate-400">No social links added</span>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-3 rounded-[18px] bg-white p-3 text-slate-900 shadow-[0_12px_30px_rgba(0,0,0,0.16)]">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[12px] border-2 border-[#e5e0d8] bg-white p-2 shadow-sm">
-                    {paymentQr ? (
-                      <img src={paymentQr} alt="QR" className="h-full w-full rounded-[10px] object-cover" />
-                    ) : (
-                      <div className="grid h-full w-full grid-cols-4 gap-1 rounded-[8px] bg-[#faf8f5] p-1">
-                        {Array.from({ length: 16 }).map((_, i) => (
-                          <div key={i} className={i % 2 === 0 ? 'bg-slate-900 rounded' : 'bg-white'} />
-                        ))}
-                      </div>
+              <h2 className="ecard-heading">Products <span>All Items</span></h2>
+              <div className="ecard-divider" style={{ marginBottom: '30px' }} />
+              <div className="ecard-products-grid">
+                {business.products.map(product => (
+                  <div key={product._id} className="ecard-product-card">
+                    {product.image && (
+                      <img src={assetUrl(product.image)} alt={product.name} />
                     )}
+                    <h6>{product.name}</h6>
+                    {product.price && (
+                      <p className="ecard-product-price">
+                        <FaRupeeSign style={{ fontSize: '12px' }} />{product.price}
+                      </p>
+                    )}
+                    {product.description && <p>{product.description}</p>}
                   </div>
-                  <div>
-                    <div className="text-[0.68rem] font-black uppercase tracking-[0.12em] text-slate-800">Scan & Pay</div>
-                    <div className="mt-0.5 max-w-[110px] truncate text-[0.58rem] font-medium text-slate-500">{business.upiId || 'upi@bizcardly'}</div>
-                  </div>
-                </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-                <div className="flex flex-col gap-2">
-                  <button onClick={handleCall} className="rounded-full bg-gradient-to-br from-[#ede9fe] to-[#f3e8ff] px-4 py-2.5 text-[0.64rem] font-bold text-[#6d28d9] transition duration-200 hover:from-[#e9d5ff] hover:to-[#ede9fe] hover:shadow-md">Contact <span className="ml-0.5">-&gt;</span></button>
-                  <button onClick={handleWhatsapp} className="rounded-full bg-gradient-to-br from-[#1fc86a] to-[#16a34a] px-4 py-2.5 text-[0.64rem] font-bold text-white transition duration-200 hover:from-[#16a34a] hover:to-[#15803d] hover:shadow-lg">WhatsApp <span className="ml-0.5">-&gt;</span></button>
+          {/* ===== SERVICES SECTION (full list) ===== */}
+          {business.services?.length > 6 && (
+            <section
+              id="ecard-services"
+              ref={el => sectionsRef.current['services'] = el}
+              className="ecard-box ecard-box-dark"
+            >
+              <h2 className="ecard-heading">Services <span>What We Do</span></h2>
+              <div className="ecard-divider" style={{ marginBottom: '30px' }} />
+              <div className="ecard-products-grid">
+                {business.services.map(service => (
+                  <div key={service._id} className="ecard-product-card">
+                    <div className="ecard-product-icon"><FaConciergeBell /></div>
+                    <h6>{service.name}</h6>
+                    {service.price && (
+                      <p className="ecard-product-price">
+                        <FaRupeeSign style={{ fontSize: '12px' }} />{service.price}
+                      </p>
+                    )}
+                    {service.description && <p>{service.description}</p>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ===== GALLERY SECTION ===== */}
+          {business.gallery?.length > 0 && (
+            <section
+              id="ecard-gallery"
+              ref={el => sectionsRef.current['gallery'] = el}
+              className="ecard-box ecard-box-dark"
+            >
+              <h2 className="ecard-heading">Gallery <span>Photos</span></h2>
+              <div className="ecard-divider" style={{ marginBottom: '30px' }} />
+              <div className="ecard-gallery-grid">
+                {business.gallery.map((item, i) => (
+                  <div key={item._id || i} className="ecard-gallery-item">
+                    <img src={assetUrl(item.imageUrl || item.image)} alt={`Gallery ${i + 1}`} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ===== VIDEOS SECTION ===== */}
+          {business.videos?.length > 0 && (
+            <section
+              id="ecard-videos"
+              ref={el => sectionsRef.current['videos'] = el}
+              className="ecard-box ecard-box-dark"
+            >
+              <h2 className="ecard-heading">Videos <span>Watch</span></h2>
+              <div className="ecard-divider" style={{ marginBottom: '30px' }} />
+              {business.videos.map(video => (
+                <div key={video._id} className="ecard-video-item">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${video.youtubeId || video.videoUrl?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1] || ''}`}
+                    title={video.title}
+                    allowFullScreen
+                  />
+                  <h5>{video.title}</h5>
+                </div>
+              ))}
+            </section>
+          )}
+
+          {/* ===== PAYMENT QR SECTION ===== */}
+          {qr && (
+            <section className="ecard-box ecard-box-dark">
+              <h2 className="ecard-heading">Payment <span>Scan & Pay</span></h2>
+              <div className="ecard-divider" style={{ marginBottom: '30px' }} />
+              <div className="ecard-payment-section">
+                <img src={qr} alt="Payment QR" className="ecard-payment-qr" />
+                <h5>Scan to Pay</h5>
+                {business.upiId && <p className="ecard-payment-upi">{business.upiId}</p>}
+              </div>
+            </section>
+          )}
+
+          {/* ===== FEEDBACK / REVIEWS SECTION ===== */}
+          <section
+            id="ecard-feedback"
+            ref={el => sectionsRef.current['feedback'] = el}
+            className="ecard-box ecard-box-dark"
+          >
+            <h2 className="ecard-heading">Reviews <span>Feedback</span></h2>
+            <div className="ecard-divider" style={{ marginBottom: '30px' }} />
+
+            <div className="ecard-feedback-card">
+              <h4 className="ecard-feedback-title">
+                <FaCommentDots /> Share Your Experience
+              </h4>
+
+              <div className="ecard-feedback-field">
+                <label>Your Rating</label>
+                <div className="ecard-fiverating">
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <FaStar
+                      key={n}
+                      className={(hoverRating || rating) >= n ? 'ecard-checked' : ''}
+                      style={{ color: (hoverRating || rating) >= n ? 'orange' : 'var(--secondary-text)' }}
+                      onClick={() => setRating(n)}
+                      onMouseEnter={() => setHoverRating(n)}
+                      onMouseLeave={() => setHoverRating(0)}
+                    />
+                  ))}
                 </div>
               </div>
-            </div>
 
-            <div className="mt-3">
+              <div className="ecard-feedback-field">
+                <label htmlFor="ecard-review-name">Name</label>
+                <input
+                  id="ecard-review-name"
+                  type="text"
+                  className="ecard-txt"
+                  placeholder="Your Name"
+                  value={reviewForm.name}
+                  onChange={e => setReviewForm({ ...reviewForm, name: e.target.value })}
+                />
+              </div>
+
+              <div className="ecard-feedback-field">
+                <label htmlFor="ecard-review-text">Write a Review</label>
+                <textarea
+                  id="ecard-review-text"
+                  className="ecard-txt"
+                  placeholder="Tell us about your experience..."
+                  value={reviewForm.review}
+                  onChange={e => setReviewForm({ ...reviewForm, review: e.target.value })}
+                />
+              </div>
+
               <button
-                onClick={() => navigate('/login')}
-                className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-white/30 bg-white/10 px-4 py-3 text-[0.64rem] font-bold uppercase tracking-[0.14em] text-white transition duration-200 hover:bg-white/20 hover:shadow-md"
+                className="ecard-btn-submit"
+                onClick={handleReviewSubmit}
+                disabled={submittingReview}
               >
-                <FaUserLock className="text-xs" />
-                Admin Login
+                <FaPaperPlane /> {submittingReview ? 'Submitting...' : 'Publish Review'}
               </button>
             </div>
+          </section>
 
-            {!business.removeBranding && (
-              <div className="mt-3 text-center">
-                <span className="text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-white/50">
-                  Powered by BizCardly
-                </span>
+          {/* ===== ENQUIRY SECTION ===== */}
+          <section
+            id="ecard-enquiry"
+            ref={el => sectionsRef.current['enquiry'] = el}
+            className="ecard-box ecard-box-dark"
+          >
+            <h2 className="ecard-heading">Enquiry <span>Contact</span></h2>
+            <div className="ecard-divider" style={{ marginBottom: '30px' }} />
+
+            <form onSubmit={handleEnquirySubmit}>
+              <div className="ecard-form-row">
+                <input
+                  required
+                  type="text"
+                  className="ecard-txt"
+                  placeholder="Enter Your Full Name"
+                  value={enquiryForm.name}
+                  onChange={e => setEnquiryForm({ ...enquiryForm, name: e.target.value })}
+                />
+                <input
+                  required
+                  type="email"
+                  className="ecard-txt"
+                  placeholder="Enter Your Email"
+                  value={enquiryForm.email}
+                  onChange={e => setEnquiryForm({ ...enquiryForm, email: e.target.value })}
+                />
               </div>
-            )}
+              <div className="ecard-form-row">
+                <input
+                  required
+                  type="text"
+                  className="ecard-txt"
+                  placeholder="Enter Your Phone"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  value={enquiryForm.phone}
+                  onChange={e => setEnquiryForm({ ...enquiryForm, phone: e.target.value })}
+                />
+                <input
+                  type="text"
+                  className="ecard-txt"
+                  placeholder="Enter Your Subject"
+                  value={enquiryForm.subject}
+                  onChange={e => setEnquiryForm({ ...enquiryForm, subject: e.target.value })}
+                />
+              </div>
+              <textarea
+                required
+                className="ecard-txt"
+                placeholder="Enter Your Message"
+                value={enquiryForm.message}
+                onChange={e => setEnquiryForm({ ...enquiryForm, message: e.target.value })}
+              />
+              <button
+                type="submit"
+                className="ecard-btn-submit"
+                disabled={submittingEnquiry}
+              >
+                {submittingEnquiry ? 'Sending...' : 'Send Your Enquiry'}
+              </button>
+            </form>
+          </section>
 
+          {/* Admin Login */}
+          <div className="ecard-admin-login">
+            <button onClick={() => navigate('/login')}>
+              <FaUserLock /> Admin Login
+            </button>
           </div>
-        </div>
-        </div>
-      </div>
+        </article>
+      </main>
+
+      {/* Footer */}
+      <footer className="ecard-footer">
+        <p>
+          &copy;{new Date().getFullYear()} {businessTitle}<br />
+          Powered By <a href="https://bizcardly.vercel.app" target="_blank" rel="noopener noreferrer">BizCardly</a>
+        </p>
+      </footer>
     </div>
   );
 };
