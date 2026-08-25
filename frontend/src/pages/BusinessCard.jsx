@@ -544,26 +544,6 @@ const BusinessCard = () => {
 
             {aboutText && <p className="ecard-about-intro">{aboutText}</p>}
 
-            {/* Products as cards in about section (max 4) */}
-            {business.products?.length > 0 && (
-              <>
-                <h4 className="ecard-about-subheading">Our Products</h4>
-                <div className="ecard-products-grid">
-                  {business.products.slice(0, 4).map(product => (
-                    <div key={product._id} className="ecard-product-card">
-                      <h6>{product.name}</h6>
-                      {product.price && (
-                        <p className="ecard-product-price">
-                          <FaRupeeSign style={{ fontSize: '12px' }} />{product.price}
-                        </p>
-                      )}
-                      {product.description && <p>{product.description}</p>}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
             {/* Services as checklist */}
             {business.services?.length > 0 && (
               <>
