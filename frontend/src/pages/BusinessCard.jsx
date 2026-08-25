@@ -5,6 +5,7 @@ import { getImageUrl } from '../utils/imageUrl';
 import Particles from '../components/Particles';
 import Cursor from '../components/Cursor';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import logoNgo from '../assets/logo_ngo.jpeg';
 import {
   FaPhone, FaEnvelope, FaGlobe, FaMapMarkerAlt, FaWhatsapp,
   FaHome, FaAddressCard, FaStar, FaHeadset, FaShare, FaDownload,
@@ -745,6 +746,7 @@ const BusinessCard = () => {
 
           {/* Admin Login */}
           <div className="ecard-admin-login">
+            <img src={logoNgo} alt="Logo" className="ecard-admin-logo" />
             <button onClick={() => navigate('/login')}>
               <FaUserLock /> Admin Login
             </button>

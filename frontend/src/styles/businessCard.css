@@ -1030,6 +1030,15 @@ textarea.ecard-txt {
     text-align: center;
     margin-top: 15px;
 }
+.ecard-admin-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    display: block;
+    opacity: 0.7;
+}
 .ecard-admin-login a, .ecard-admin-login button {
     display: inline-flex;
     align-items: center;
