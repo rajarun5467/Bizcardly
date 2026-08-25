@@ -747,7 +747,7 @@ const BusinessCard = () => {
           {/* Admin Login */}
           <div className="ecard-admin-login">
             <button onClick={() => navigate('/login')}>
-              <img src={logoNgo} alt="Logo" className="ecard-admin-logo" style={{ width: '30px', height: '30px', marginRight: '10px' }} />
+              <img src={logoNgo} alt="Logo" className="ecard-admin-logo" style={{ width: '60px', height: '60px', marginRight: '10px' }} />
               <FaUserLock /> Admin Login
             </button>
           </div>
