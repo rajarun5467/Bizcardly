@@ -960,16 +960,38 @@ textarea.ecard-txt {
 .ecard-footer {
     margin-bottom: 90px;
     text-align: center;
-    padding: 20px;
+    padding: 24px 20px 20px;
     position: relative;
     z-index: 5;
 }
 .ecard-footer p {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--black-color);
+    margin: 0 0 6px;
+}
+.ecard-footer-credit {
+    font-size: 11px;
+    color: var(--secondary-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    line-height: 1.5;
+}
+.ecard-footer-credit strong {
+    color: var(--accent-color);
+    font-weight: 800;
+    letter-spacing: 0.5px;
 }
 .ecard-footer a {
     color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+.ecard-footer a:hover {
+    opacity: 0.8;
     text-decoration: underline;
 }
 

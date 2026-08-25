@@ -787,8 +787,10 @@ const BusinessCard = () => {
       {/* Footer */}
       <footer className="ecard-footer">
         <p>
-          &copy;{new Date().getFullYear()} {businessTitle}<br />
-          Powered By <a href="https://bizcardly.vercel.app" target="_blank" rel="noopener noreferrer">BizCardly</a>
+          &copy;{new Date().getFullYear()} {businessTitle}
+        </p>
+        <p className="ecard-footer-credit">
+          Powered by <strong>NIS</strong> — <a href="https://nishkarshit.com" target="_blank" rel="noopener noreferrer">Digital Business Card</a> | Top Rated & Free
         </p>
       </footer>
     </div>
