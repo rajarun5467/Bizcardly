@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { QRCodeSVG } from 'qrcode.react';
-import { FaDownload, FaShareAlt } from 'react-icons/fa';
+import { FaDownload, FaShareAlt, FaExternalLinkAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 const QRCode = () => {
@@ -73,10 +73,26 @@ const QRCode = () => {
           
           <div className="text-center">
             <h3 className="text-xl font-semibold text-gray-800">{business.name}</h3>
-            <p className="text-gray-500 mt-1">{qrUrl}</p>
+            <a
+              href={qrUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-600 hover:text-indigo-800 hover:underline mt-1 inline-block"
+            >
+              {qrUrl}
+            </a>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap justify-center">
+            <a
+              href={qrUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              <FaExternalLinkAlt />
+              Open Card
+            </a>
             <button
               onClick={downloadQR}
               className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
