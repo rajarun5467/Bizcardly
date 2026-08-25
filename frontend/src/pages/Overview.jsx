@@ -16,6 +16,7 @@ import {
 const Overview = () => {
   const { business, refreshBusiness } = useAuth();
   const [stats, setStats] = useState({ products: 0, services: 0, gallery: 0, videos: 0 });
+  const [analytics, setAnalytics] = useState(null);
 
   useEffect(() => {
     if (!business) {
@@ -26,18 +27,20 @@ const Overview = () => {
       try {
         console.log('📊 Fetching dashboard stats...');
         const token = localStorage.getItem('bizcardly_token');
-        const [productsRes, servicesRes, galleryRes, videosRes] = await Promise.all([
+        const [productsRes, servicesRes, galleryRes, videosRes, analyticsRes] = await Promise.all([
           fetch(`${API_BASE_URL}/products`, { headers: { Authorization: `Bearer ${token}` } }),
           fetch(`${API_BASE_URL}/services`, { headers: { Authorization: `Bearer ${token}` } }),
           fetch(`${API_BASE_URL}/gallery`, { headers: { Authorization: `Bearer ${token}` } }),
           fetch(`${API_BASE_URL}/videos`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_BASE_URL}/visitors/analytics`, { headers: { Authorization: `Bearer ${token}` } }),
         ]);
 
-        const [products, services, gallery, videos] = await Promise.all([
+        const [products, services, gallery, videos, analyticsData] = await Promise.all([
           productsRes.json(),
           servicesRes.json(),
           galleryRes.json(),
           videosRes.json(),
+          analyticsRes.json(),
         ]);
 
         console.log('✅ Stats loaded:', {
@@ -53,6 +56,10 @@ const Overview = () => {
           gallery: gallery.gallery?.length || 0,
           videos: videos.videos?.length || 0,
         });
+
+        if (analyticsData.success && analyticsData.analytics) {
+          setAnalytics(analyticsData.analytics);
+        }
       } catch (err) {
         console.error('❌ Failed to fetch stats:', err);
       }
@@ -62,10 +69,10 @@ const Overview = () => {
   }, [business, refreshBusiness]);
 
   const metricCards = [
-    { icon: FaUsers, label: 'Total Visitors', value: '12,458', growth: '18.6%', color: 'text-[#7557f4]', bg: 'bg-[#efeaff]' },
-    { icon: FaEye, label: 'Profile Views', value: '8,245', growth: '22.4%', color: 'text-[#20aa69]', bg: 'bg-[#e5f8ee]' },
-    { icon: FaChartLine, label: 'Total Inquiries', value: '342', growth: '16.3%', color: 'text-[#ff8b22]', bg: 'bg-[#fff0df]' },
-    { icon: FaMousePointer, label: 'Button Clicks', value: '1,256', growth: '20.8%', color: 'text-[#2d8cff]', bg: 'bg-[#eaf3ff]' },
+    { icon: FaUsers, label: 'Total Visitors', value: analytics?.total ?? 0, color: 'text-[#7557f4]', bg: 'bg-[#efeaff]' },
+    { icon: FaEye, label: "Today's Views", value: analytics?.today ?? 0, color: 'text-[#20aa69]', bg: 'bg-[#e5f8ee]' },
+    { icon: FaChartLine, label: 'This Week', value: analytics?.week ?? 0, color: 'text-[#ff8b22]', bg: 'bg-[#fff0df]' },
+    { icon: FaMousePointer, label: 'This Month', value: analytics?.month ?? 0, color: 'text-[#2d8cff]', bg: 'bg-[#eaf3ff]' },
   ];
 
   const manageCards = [
@@ -83,16 +90,7 @@ const Overview = () => {
     { icon: FaCog, label: 'Settings', path: '/dashboard/profile', description: 'Manage account settings and preferences.', color: 'text-[#64748b]', bg: 'bg-[#eef1f5]' },
   ];
 
-  const visitorData = [
-    { day: '1', visitors: 1200 }, { day: '3', visitors: 1220 },
-    { day: '5', visitors: 1680 }, { day: '7', visitors: 2120 },
-    { day: '9', visitors: 1740 }, { day: '11', visitors: 1450 },
-    { day: '13', visitors: 1620 }, { day: '15', visitors: 2050 },
-    { day: '17', visitors: 1730 }, { day: '19', visitors: 1390 },
-    { day: '21', visitors: 1660 }, { day: '23', visitors: 1190 },
-    { day: '25', visitors: 1080 }, { day: '27', visitors: 1540 },
-    { day: '29', visitors: 2290 }, { day: '31', visitors: 2050 },
-  ];
+  const visitorData = (analytics?.last7Days || []).map(d => ({ day: d.date, visitors: d.views }));
 
   const trafficData = [
     { name: 'Direct', value: 45, color: '#5b7cff' },
@@ -130,7 +128,7 @@ const Overview = () => {
                 <div>
                   <p className="text-sm font-medium text-slate-500">{metric.label}</p>
                   <h3 className="mt-1 text-2xl font-black text-[#11142f]">{metric.value}</h3>
-                  <p className="mt-2 text-xs text-slate-500"><span className="font-semibold text-emerald-600">up {metric.growth}</span> from last month</p>
+                  <p className="mt-2 text-xs text-slate-500">Real-time visitor data</p>
                 </div>
               </div>
             </div>

@@ -123,7 +123,11 @@ const BusinessCard = () => {
 
   useEffect(() => {
     if (slug) {
-      fetch(`${API_BASE_URL}/visitors/${slug}`, { method: 'POST' }).catch(() => {});
+      fetch(`${API_BASE_URL}/visitors/${slug}`, { method: 'POST' })
+        .then(() => {
+          setBusiness(prev => prev ? { ...prev, views: (prev.views || 0) + 1 } : prev);
+        })
+        .catch(() => {});
     }
   }, [slug]);
 

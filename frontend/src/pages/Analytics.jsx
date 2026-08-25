@@ -14,7 +14,7 @@ const Analytics = () => {
   const fetchAnalytics = async () => {
     try {
       const token = localStorage.getItem('bizcardly_token');
-      const res = await fetch(`${API_BASE_URL}/analytics`, {
+      const res = await fetch(`${API_BASE_URL}/visitors/analytics`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

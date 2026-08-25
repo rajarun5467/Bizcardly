@@ -3,6 +3,7 @@ const Product = require('../models/Product');
 const Service = require('../models/Service');
 const Gallery = require('../models/Gallery');
 const Video = require('../models/Video');
+const Visitor = require('../models/Visitor');
 const slugify = require('slugify');
 const cloudinary = require('../config/cloudinary');
 const { hasFeature } = require('../utils/subscriptionUtils');
@@ -351,17 +352,18 @@ exports.getPublicBusiness = async (req, res) => {
     }
 
     // Fetch all associated data
-    const [products, services, gallery, videos, removeBranding] = await Promise.all([
+    const [products, services, gallery, videos, removeBranding, views] = await Promise.all([
       Product.find({ businessId: business._id, status: 'active' }),
       Service.find({ businessId: business._id, status: 'active' }),
       Gallery.find({ businessId: business._id }).sort({ createdAt: -1 }),
       Video.find({ businessId: business._id }).sort({ createdAt: -1 }),
       hasFeature(business.userId, 'remove_branding'),
+      Visitor.countDocuments({ businessId: business._id }),
     ]);
 
     res.json({
       success: true,
-      business: { ...business.toObject(), removeBranding },
+      business: { ...business.toObject(), removeBranding, views },
       products,
       services,
       gallery,
