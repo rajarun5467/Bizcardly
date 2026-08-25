@@ -29,8 +29,8 @@
     --accent-color: #818CF8;
     --divider-color: rgba(255, 255, 255, 0.18);
     --heading-watermark: rgba(255, 255, 255, 0.07);
-    --card-bg-1: rgba(26, 35, 50, 0.85);
-    --card-bg-2: rgba(37, 50, 74, 0.85);
+    --card-bg-1: #1A2332;
+    --card-bg-2: #25324A;
     --card-shadow: rgba(0, 0, 0, 0.6);
 }
 
