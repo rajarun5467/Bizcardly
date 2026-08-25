@@ -56,7 +56,7 @@ const Particles = ({ theme = 'dark' }) => {
           y: Math.random() * canvas.height,
           vx: (Math.random() - 0.5) * 0.6,
           vy: (Math.random() - 0.5) * 0.6,
-          radius: Math.random() * 4 + 2,
+          radius: Math.random() * 2 + 1.5,
           color: color,
           opacity: Math.max(0.4, Math.random() * baseOpacity),
           baseOpacity: baseOpacity,
