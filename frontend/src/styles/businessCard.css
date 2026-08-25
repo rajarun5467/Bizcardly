@@ -1106,22 +1106,103 @@ textarea.ecard-txt {
 /* ---- WOW Scroll Reveal Animations ---- */
 .ecard-wow {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
+    transition: none;
 }
 .ecard-wow.ecard-wow-visible {
     opacity: 1;
     transform: translateY(0);
-    animation: ecard-vanishIn 0.8s ease-out;
+    animation: ecard-vanishIn 0.7s ease-out;
 }
 @keyframes ecard-vanishIn {
     0% {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px) scale(0.97);
     }
     100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
+}
+
+/* Staggered animations for inner elements */
+.ecard-wow.ecard-wow-visible .ecard-heading {
+    animation: ecard-fadeInLeft 0.6s ease-out 0.15s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-profile-img {
+    animation: ecard-zoomIn 0.6s ease-out 0.1s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-business-name {
+    animation: ecard-fadeInUp 0.5s ease-out 0.2s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-owner-name {
+    animation: ecard-fadeInUp 0.5s ease-out 0.3s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-person-type {
+    animation: ecard-fadeInUp 0.5s ease-out 0.4s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-contact-info {
+    animation: ecard-fadeInUp 0.5s ease-out 0.35s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-contact-detail {
+    animation: ecard-fadeInLeft 0.5s ease-out 0.3s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-product-card {
+    animation: ecard-fadeInUp 0.5s ease-out both;
+}
+.ecard-wow.ecard-wow-visible .ecard-product-card:nth-child(1) { animation-delay: 0.1s; }
+.ecard-wow.ecard-wow-visible .ecard-product-card:nth-child(2) { animation-delay: 0.2s; }
+.ecard-wow.ecard-wow-visible .ecard-product-card:nth-child(3) { animation-delay: 0.3s; }
+.ecard-wow.ecard-wow-visible .ecard-product-card:nth-child(4) { animation-delay: 0.4s; }
+.ecard-wow.ecard-wow-visible .ecard-about-info-item {
+    animation: ecard-fadeInLeft 0.5s ease-out 0.2s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-about-checklist li {
+    animation: ecard-fadeInLeft 0.4s ease-out both;
+}
+.ecard-wow.ecard-wow-visible .ecard-about-checklist li:nth-child(1) { animation-delay: 0.1s; }
+.ecard-wow.ecard-wow-visible .ecard-about-checklist li:nth-child(2) { animation-delay: 0.15s; }
+.ecard-wow.ecard-wow-visible .ecard-about-checklist li:nth-child(3) { animation-delay: 0.2s; }
+.ecard-wow.ecard-wow-visible .ecard-about-checklist li:nth-child(4) { animation-delay: 0.25s; }
+.ecard-wow.ecard-wow-visible .ecard-about-checklist li:nth-child(5) { animation-delay: 0.3s; }
+.ecard-wow.ecard-wow-visible .ecard-about-checklist li:nth-child(6) { animation-delay: 0.35s; }
+.ecard-wow.ecard-wow-visible .ecard-feedback-card {
+    animation: ecard-fadeInUp 0.6s ease-out 0.2s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-payment-section {
+    animation: ecard-zoomIn 0.6s ease-out 0.2s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-share-whatsapp {
+    animation: ecard-fadeInUp 0.5s ease-out 0.3s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-social-share {
+    animation: ecard-fadeInUp 0.5s ease-out 0.4s both;
+}
+.ecard-wow.ecard-wow-visible .ecard-social-share a {
+    animation: ecard-popIn 0.4s ease-out both;
+}
+.ecard-wow.ecard-wow-visible .ecard-social-share a:nth-child(1) { animation-delay: 0.4s; }
+.ecard-wow.ecard-wow-visible .ecard-social-share a:nth-child(2) { animation-delay: 0.5s; }
+.ecard-wow.ecard-wow-visible .ecard-social-share a:nth-child(3) { animation-delay: 0.6s; }
+.ecard-wow.ecard-wow-visible .ecard-social-share a:nth-child(4) { animation-delay: 0.7s; }
+.ecard-wow.ecard-wow-visible .ecard-social-share a:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes ecard-fadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes ecard-fadeInLeft {
+    0% { opacity: 0; transform: translateX(-25px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes ecard-zoomIn {
+    0% { opacity: 0; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1); }
+}
+@keyframes ecard-popIn {
+    0% { opacity: 0; transform: scale(0); }
+    70% { transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 /* ---- Loading Spinner ---- */

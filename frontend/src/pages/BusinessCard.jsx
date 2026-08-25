@@ -4,6 +4,7 @@ import { API_BASE_URL } from '../api/config';
 import { getImageUrl } from '../utils/imageUrl';
 import Particles from '../components/Particles';
 import Cursor from '../components/Cursor';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 import {
   FaPhone, FaEnvelope, FaGlobe, FaMapMarkerAlt, FaWhatsapp,
   FaHome, FaAddressCard, FaStar, FaHeadset, FaShare, FaDownload,
@@ -45,6 +46,24 @@ const BusinessCard = () => {
   const [toasts, setToasts] = useState([]);
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const sectionsRef = useRef({});
+  const [revealRefs, setRevealRefs] = useState({});
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('ecard-wow-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
+    );
+
+    document.querySelectorAll('.ecard-wow').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, [business]);
 
   const showToast = useCallback((title, message, type = 'success') => {
     const id = Date.now() + Math.random();
@@ -343,7 +362,7 @@ const BusinessCard = () => {
           <section
             id="ecard-home"
             ref={el => sectionsRef.current['home'] = el}
-            className="ecard-box ecard-box-dark"
+            className="ecard-box ecard-box-dark ecard-wow"
           >
             <div>
               <div className="ecard-profile">
@@ -486,7 +505,7 @@ const BusinessCard = () => {
           <section
             id="ecard-about"
             ref={el => sectionsRef.current['about'] = el}
-            className="ecard-box ecard-box-dark ecard-about"
+            className="ecard-box ecard-box-dark ecard-about ecard-wow"
           >
             <h2 className="ecard-heading">About us <span>Know More</span></h2>
             <div className="ecard-divider" style={{ marginBottom: '30px' }} />
@@ -569,7 +588,7 @@ const BusinessCard = () => {
             <section
               id="ecard-services"
               ref={el => sectionsRef.current['services'] = el}
-              className="ecard-box ecard-box-dark"
+              className="ecard-box ecard-box-dark ecard-wow"
             >
               <h2 className="ecard-heading">Services <span>What We Do</span></h2>
               <div className="ecard-divider" style={{ marginBottom: '30px' }} />
@@ -592,7 +611,7 @@ const BusinessCard = () => {
 
           {/* ===== PAYMENT QR SECTION ===== */}
           {qr && (
-            <section className="ecard-box ecard-box-dark">
+            <section className="ecard-box ecard-box-dark ecard-wow">
               <h2 className="ecard-heading">Payment <span>Scan & Pay</span></h2>
               <div className="ecard-divider" style={{ marginBottom: '30px' }} />
               <div className="ecard-payment-section">
@@ -607,7 +626,7 @@ const BusinessCard = () => {
           <section
             id="ecard-feedback"
             ref={el => sectionsRef.current['feedback'] = el}
-            className="ecard-box ecard-box-dark"
+            className="ecard-box ecard-box-dark ecard-wow"
           >
             <h2 className="ecard-heading">Reviews <span>Feedback</span></h2>
             <div className="ecard-divider" style={{ marginBottom: '30px' }} />
@@ -670,7 +689,7 @@ const BusinessCard = () => {
           <section
             id="ecard-enquiry"
             ref={el => sectionsRef.current['enquiry'] = el}
-            className="ecard-box ecard-box-dark"
+            className="ecard-box ecard-box-dark ecard-wow"
           >
             <h2 className="ecard-heading">Enquiry <span>Contact</span></h2>
             <div className="ecard-divider" style={{ marginBottom: '30px' }} />
