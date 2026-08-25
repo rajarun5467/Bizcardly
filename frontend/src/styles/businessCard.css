@@ -1060,22 +1060,22 @@ textarea.ecard-txt {
 
 /* ---- WOW Scroll Reveal Animations ---- */
 .ecard-wow {
-    visibility: hidden;
     opacity: 0;
+    transform: translateY(20px);
 }
 .ecard-wow.ecard-wow-visible {
-    visibility: visible;
     opacity: 1;
+    transform: translateY(0);
     animation: ecard-vanishIn 0.8s ease-out;
 }
 @keyframes ecard-vanishIn {
     0% {
         opacity: 0;
-        transform: translateY(30px) scale(0.95);
+        transform: translateY(20px);
     }
     100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 }
 

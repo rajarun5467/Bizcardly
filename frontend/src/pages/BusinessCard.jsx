@@ -4,7 +4,6 @@ import { API_BASE_URL } from '../api/config';
 import { getImageUrl } from '../utils/imageUrl';
 import Particles from '../components/Particles';
 import Cursor from '../components/Cursor';
-import { useScrollReveal } from '../hooks/useScrollReveal';
 import {
   FaPhone, FaEnvelope, FaGlobe, FaMapMarkerAlt, FaWhatsapp,
   FaHome, FaAddressCard, FaStar, FaHeadset, FaShare, FaDownload,
@@ -46,15 +45,6 @@ const BusinessCard = () => {
   const [toasts, setToasts] = useState([]);
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const sectionsRef = useRef({});
-
-  // WOW-like scroll reveal animations for section headings
-  const [aboutHeadRef, aboutHeadVisible] = useScrollReveal();
-  const [productsHeadRef, productsHeadVisible] = useScrollReveal();
-  const [servicesHeadRef, servicesHeadVisible] = useScrollReveal();
-  const [galleryHeadRef, galleryHeadVisible] = useScrollReveal();
-  const [videosHeadRef, videosHeadVisible] = useScrollReveal();
-  const [feedbackHeadRef, feedbackHeadVisible] = useScrollReveal();
-  const [enquiryHeadRef, enquiryHeadVisible] = useScrollReveal();
 
   const showToast = useCallback((title, message, type = 'success') => {
     const id = Date.now() + Math.random();
@@ -498,7 +488,7 @@ const BusinessCard = () => {
             ref={el => sectionsRef.current['about'] = el}
             className="ecard-box ecard-box-dark ecard-about"
           >
-            <h2 ref={aboutHeadRef} className={`ecard-heading ecard-wow ${aboutHeadVisible ? 'ecard-wow-visible' : ''}`}>About us <span>Know More</span></h2>
+            <h2 className="ecard-heading">About us <span>Know More</span></h2>
             <div className="ecard-divider" style={{ marginBottom: '30px' }} />
 
             <div className="ecard-about-info-row">
@@ -581,7 +571,7 @@ const BusinessCard = () => {
               ref={el => sectionsRef.current['products'] = el}
               className="ecard-box ecard-box-dark"
             >
-              <h2 ref={productsHeadRef} className={`ecard-heading ecard-wow ${productsHeadVisible ? 'ecard-wow-visible' : ''}`}>Products <span>All Items</span></h2>
+              <h2 className="ecard-heading">Products <span>All Items</span></h2>
               <div className="ecard-divider" style={{ marginBottom: '30px' }} />
               <div className="ecard-products-grid">
                 {business.products.map(product => (
@@ -609,7 +599,7 @@ const BusinessCard = () => {
               ref={el => sectionsRef.current['services'] = el}
               className="ecard-box ecard-box-dark"
             >
-              <h2 ref={servicesHeadRef} className={`ecard-heading ecard-wow ${servicesHeadVisible ? 'ecard-wow-visible' : ''}`}>Services <span>What We Do</span></h2>
+              <h2 className="ecard-heading">Services <span>What We Do</span></h2>
               <div className="ecard-divider" style={{ marginBottom: '30px' }} />
               <div className="ecard-products-grid">
                 {business.services.map(service => (
@@ -635,7 +625,7 @@ const BusinessCard = () => {
               ref={el => sectionsRef.current['gallery'] = el}
               className="ecard-box ecard-box-dark"
             >
-              <h2 ref={galleryHeadRef} className={`ecard-heading ecard-wow ${galleryHeadVisible ? 'ecard-wow-visible' : ''}`}>Gallery <span>Photos</span></h2>
+              <h2 className="ecard-heading">Gallery <span>Photos</span></h2>
               <div className="ecard-divider" style={{ marginBottom: '30px' }} />
               <div className="ecard-gallery-grid">
                 {business.gallery.map((item, i) => (
@@ -654,7 +644,7 @@ const BusinessCard = () => {
               ref={el => sectionsRef.current['videos'] = el}
               className="ecard-box ecard-box-dark"
             >
-              <h2 ref={videosHeadRef} className={`ecard-heading ecard-wow ${videosHeadVisible ? 'ecard-wow-visible' : ''}`}>Videos <span>Watch</span></h2>
+              <h2 className="ecard-heading">Videos <span>Watch</span></h2>
               <div className="ecard-divider" style={{ marginBottom: '30px' }} />
               {business.videos.map(video => (
                 <div key={video._id} className="ecard-video-item">
@@ -688,7 +678,7 @@ const BusinessCard = () => {
             ref={el => sectionsRef.current['feedback'] = el}
             className="ecard-box ecard-box-dark"
           >
-            <h2 ref={feedbackHeadRef} className={`ecard-heading ecard-wow ${feedbackHeadVisible ? 'ecard-wow-visible' : ''}`}>Reviews <span>Feedback</span></h2>
+            <h2 className="ecard-heading">Reviews <span>Feedback</span></h2>
             <div className="ecard-divider" style={{ marginBottom: '30px' }} />
 
             <div className="ecard-feedback-card">
@@ -751,7 +741,7 @@ const BusinessCard = () => {
             ref={el => sectionsRef.current['enquiry'] = el}
             className="ecard-box ecard-box-dark"
           >
-            <h2 ref={enquiryHeadRef} className={`ecard-heading ecard-wow ${enquiryHeadVisible ? 'ecard-wow-visible' : ''}`}>Enquiry <span>Contact</span></h2>
+            <h2 className="ecard-heading">Enquiry <span>Contact</span></h2>
             <div className="ecard-divider" style={{ marginBottom: '30px' }} />
 
             <form onSubmit={handleEnquirySubmit}>

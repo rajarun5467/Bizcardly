@@ -14,14 +14,15 @@ const Particles = ({ theme = 'dark' }) => {
   const clickRef = useRef({ x: null, y: null, time: 0 });
   const themeRef = useRef(theme);
 
+  // Update particle colors when theme prop changes
   useEffect(() => {
     themeRef.current = theme;
-    // Update particle colors when theme changes
     const color = theme === 'dark' ? '#ffffff' : '#7C3AED';
-    const opacity = theme === 'dark' ? 0.5 : 0.35;
+    const baseOpacity = theme === 'dark' ? 0.85 : 0.75;
     particlesRef.current.forEach(p => {
       p.color = color;
-      p.opacity = opacity;
+      p.baseOpacity = baseOpacity;
+      p.opacity = Math.max(0.4, Math.random() * baseOpacity);
     });
   }, [theme]);
 
@@ -30,7 +31,7 @@ const Particles = ({ theme = 'dark' }) => {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    const PARTICLE_COUNT = 160;
+    const PARTICLE_COUNT = 140;
     const HOVER_RADIUS = 120;
     const HOVER_STRENGTH = 0.03;
     const CLICK_RADIUS = 150;
@@ -48,16 +49,16 @@ const Particles = ({ theme = 'dark' }) => {
     const initParticles = () => {
       particlesRef.current = [];
       const color = themeRef.current === 'dark' ? '#ffffff' : '#7C3AED';
-      const baseOpacity = themeRef.current === 'dark' ? 0.5 : 0.35;
+      const baseOpacity = themeRef.current === 'dark' ? 0.85 : 0.75;
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         particlesRef.current.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
           vx: (Math.random() - 0.5) * 0.6,
           vy: (Math.random() - 0.5) * 0.6,
-          radius: Math.random() * 3 + 1,
+          radius: Math.random() * 4 + 2,
           color: color,
-          opacity: Math.max(0.2, Math.random() * baseOpacity),
+          opacity: Math.max(0.4, Math.random() * baseOpacity),
           baseOpacity: baseOpacity,
         });
       }
@@ -136,12 +137,15 @@ const Particles = ({ theme = 'dark' }) => {
           }
         }
 
-        // Draw particle
+        // Draw particle with soft glow
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = p.color;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.opacity;
         ctx.fill();
+        ctx.shadowBlur = 0;
       }
       ctx.globalAlpha = 1;
 
