@@ -119,7 +119,7 @@ const BusinessCard = () => {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPos = window.scrollY + window.innerHeight / 3;
-    const sectionIds = ['home', 'about', 'services', 'gallery', 'feedback', 'enquiry'];
+    const sectionIds = ['home', 'about', 'services', 'feedback', 'enquiry'];
       for (const id of sectionIds) {
         const el = sectionsRef.current[id];
         if (el) {
@@ -262,7 +262,6 @@ const BusinessCard = () => {
     { id: 'home', label: 'Home', icon: FaHome },
     { id: 'about', label: 'About', icon: FaAddressCard },
     ...(business?.services?.length > 0 ? [{ id: 'services', label: 'Services', icon: FaConciergeBell }] : []),
-    ...((business?.gallery?.length > 0 || business?.videos?.length > 0) ? [{ id: 'gallery', label: 'Gallery', icon: FaImages }] : []),
     { id: 'feedback', label: 'Reviews', icon: FaStar },
     { id: 'enquiry', label: 'Enquiry', icon: FaHeadset },
   ];
@@ -585,44 +584,6 @@ const BusinessCard = () => {
                   </div>
                 ))}
               </div>
-            </section>
-          )}
-
-          {/* ===== GALLERY & VIDEOS COMBINED SECTION (max 4 each) ===== */}
-          {(business.gallery?.length > 0 || business.videos?.length > 0) && (
-            <section
-              id="ecard-gallery"
-              ref={el => sectionsRef.current['gallery'] = el}
-              className="ecard-box ecard-box-dark"
-            >
-              <h2 className="ecard-heading">Gallery <span>Photos & Videos</span></h2>
-              <div className="ecard-divider" style={{ marginBottom: '30px' }} />
-
-              {business.gallery?.length > 0 && (
-                <div className="ecard-gallery-grid" style={{ marginBottom: business.videos?.length > 0 ? '30px' : '0' }}>
-                  {business.gallery.slice(0, 4).map((item, i) => (
-                    <div key={item._id || i} className="ecard-gallery-item">
-                      <img src={assetUrl(item.imageUrl || item.image)} alt={`Gallery ${i + 1}`} />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {business.videos?.length > 0 && (
-                <>
-                  {business.gallery?.length > 0 && <h4 className="ecard-about-subheading" style={{ marginBottom: '20px' }}>Videos</h4>}
-                  {business.videos.slice(0, 4).map(video => (
-                    <div key={video._id} className="ecard-video-item">
-                      <iframe
-                        src={`https://www.youtube.com/embed/${video.youtubeId || video.videoUrl?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1] || ''}`}
-                        title={video.title}
-                        allowFullScreen
-                      />
-                      <h5>{video.title}</h5>
-                    </div>
-                  ))}
-                </>
-              )}
             </section>
           )}
 
