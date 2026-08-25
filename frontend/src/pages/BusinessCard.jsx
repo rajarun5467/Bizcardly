@@ -776,7 +776,9 @@ const BusinessCard = () => {
 
           {/* Admin Login */}
           <div className="ecard-admin-login">
-            <img src={logoNgo} alt="Logo" className="ecard-admin-logo" />
+            <a href="https://www.sevaafoundation.com/" target="_blank" rel="noopener noreferrer" className="ecard-admin-logo-link">
+              <img src={logoNgo} alt="Logo" className="ecard-admin-logo" />
+            </a>
             <button onClick={() => navigate('/login')}>
               <FaUserLock /> Admin Login
             </button>

@@ -1108,6 +1108,15 @@ textarea.ecard-txt {
     align-items: center;
     gap: 10px;
 }
+.ecard-admin-logo-link {
+    display: inline-block;
+    border-radius: 50%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.ecard-admin-logo-link:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+}
 .ecard-admin-logo {
     width: 60px;
     height: 60px;
