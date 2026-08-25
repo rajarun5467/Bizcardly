@@ -32,6 +32,7 @@ import SuperAdminSubscriptions from './pages/superadmin/SuperAdminSubscriptions'
 import SuperAdminSupport from './pages/superadmin/SuperAdminSupport';
 import Support from './pages/Support';
 import Subscription from './pages/Subscription';
+import Reviews from './pages/Reviews';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -84,6 +85,7 @@ function App() {
           <Route path="payment" element={<Payment />} />
           <Route path="location" element={<Location />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="reviews" element={<Reviews />} />
           <Route path="qrcode" element={<QRCode />} />
           <Route path="support" element={<Support />} />
           <Route path="subscription" element={<Subscription />} />

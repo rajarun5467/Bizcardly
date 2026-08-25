@@ -39,7 +39,7 @@ const BusinessCard = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [reviewForm, setReviewForm] = useState({ name: '', review: '' });
+  const [reviewForm, setReviewForm] = useState({ name: '', email: '', review: '' });
   const [enquiryForm, setEnquiryForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
@@ -221,22 +221,23 @@ const BusinessCard = () => {
     setSubmittingReview(true);
     try {
       if (business?._id) {
-        await fetch(`${API_BASE_URL}/business/${business._id}/review`, {
+        await fetch(`${API_BASE_URL}/reviews/${business._id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: reviewForm.name,
+            email: reviewForm.email,
             rating,
             review: reviewForm.review,
           }),
         }).catch(() => {});
       }
       showToast('Review Posted', 'Thank you! Your review has been submitted.', 'success');
-      setReviewForm({ name: '', review: '' });
+      setReviewForm({ name: '', email: '', review: '' });
       setRating(0);
     } catch (err) {
       showToast('Review Posted', 'Thank you! Your review has been submitted.', 'success');
-      setReviewForm({ name: '', review: '' });
+      setReviewForm({ name: '', email: '', review: '' });
       setRating(0);
     } finally {
       setSubmittingReview(false);
@@ -642,6 +643,18 @@ const BusinessCard = () => {
                   placeholder="Your Name"
                   value={reviewForm.name}
                   onChange={e => setReviewForm({ ...reviewForm, name: e.target.value })}
+                />
+              </div>
+
+              <div className="ecard-feedback-field">
+                <label htmlFor="ecard-review-email">Email</label>
+                <input
+                  id="ecard-review-email"
+                  type="email"
+                  className="ecard-txt"
+                  placeholder="Your Email"
+                  value={reviewForm.email}
+                  onChange={e => setReviewForm({ ...reviewForm, email: e.target.value })}
                 />
               </div>
 

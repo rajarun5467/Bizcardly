@@ -34,6 +34,7 @@ const visitorRoutes = require('./routes/visitors');
 const superAdminRoutes = require('./routes/superAdmin');
 const supportRoutes = require('./routes/support');
 const subscriptionRoutes = require('./routes/subscription');
+const reviewRoutes = require('./routes/reviews');
 
 // Connect to MongoDB
 if (typeof connectDB === 'function') {
@@ -100,6 +101,7 @@ app.use('/api/visitors', visitorRoutes);
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

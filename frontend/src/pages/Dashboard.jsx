@@ -5,7 +5,7 @@ import {
   FaHome, FaBox, FaConciergeBell, FaImages, FaVideo,
   FaShareAlt, FaQrcode, FaMapMarkerAlt, FaChartBar,
   FaCreditCard, FaSignOutAlt, FaBars, FaTimes, FaUser,
-  FaBell, FaChevronDown, FaBriefcase, FaHeadset, FaCrown
+  FaBell, FaChevronDown, FaBriefcase, FaHeadset, FaCrown, FaStar
 } from 'react-icons/fa';
 import { API_BASE_URL } from '../api/config';
 
@@ -37,6 +37,7 @@ const Dashboard = () => {
     { path: '/dashboard/payment', icon: FaCreditCard, label: 'Payment QR' },
     { path: '/dashboard/location', icon: FaMapMarkerAlt, label: 'Location' },
     { path: '/dashboard/analytics', icon: FaChartBar, label: 'Analytics' },
+    { path: '/dashboard/reviews', icon: FaStar, label: 'Reviews' },
     { path: '/dashboard/qrcode', icon: FaQrcode, label: 'QR Code' },
     { path: '/dashboard/subscription', icon: FaCrown, label: 'Subscription' },
     { path: '/dashboard/support', icon: FaHeadset, label: 'Support' },
