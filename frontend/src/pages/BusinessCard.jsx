@@ -633,19 +633,6 @@ const BusinessCard = () => {
                 <FaCommentDots /> Share Your Experience
               </h4>
 
-              {existingReviews.length > 0 && (
-                <div className="ecard-floating-reviews">
-                  {existingReviews.map((rev, idx) => (
-                    <div key={rev._id} className={`ecard-float-review-card ecard-float-${idx + 1}`}>
-                      <div className="ecard-float-review-name">
-                        <FaStar style={{ color: '#f59e0b', fontSize: '10px' }} /> {rev.name}
-                      </div>
-                      <p className="ecard-float-review-text">{rev.review}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               <div className="ecard-feedback-field">
                 <label>Your Rating</label>
                 <div className="ecard-fiverating">
@@ -704,6 +691,22 @@ const BusinessCard = () => {
               >
                 <FaPaperPlane /> {submittingReview ? 'Submitting...' : 'Publish Review'}
               </button>
+
+              {existingReviews.length > 0 && (
+                <div className="ecard-floating-reviews">
+                  {existingReviews.map((rev, idx) => (
+                    <div key={rev._id} className={`ecard-float-review-card ecard-float-${idx + 1}`}>
+                      <div className="ecard-float-review-name">{rev.name}</div>
+                      <div className="ecard-float-review-stars">
+                        {[1, 2, 3, 4, 5].map(n => (
+                          <FaStar key={n} style={{ color: n <= rev.rating ? '#f59e0b' : '#d1d5db', fontSize: '10px' }} />
+                        ))}
+                      </div>
+                      <p className="ecard-float-review-text">{rev.review}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 

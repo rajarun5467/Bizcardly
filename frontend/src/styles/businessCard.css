@@ -805,41 +805,42 @@
     background: var(--main-bg-color3);
     border-radius: 12px;
     padding: 24px 20px;
-    position: relative;
 }
 .ecard-floating-reviews {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
+    margin-top: 18px;
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 5;
-    pointer-events: none;
-    max-width: 180px;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 .ecard-float-review-card {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 8px;
-    padding: 8px 10px;
+    border-radius: 10px;
+    padding: 10px 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     animation: ecard-floatAnim 4s ease-in-out infinite;
+    max-width: 180px;
+    min-width: 150px;
+    pointer-events: none;
 }
 .ecard-float-1 {
     animation-delay: 0s;
 }
 .ecard-float-2 {
     animation-delay: 2s;
-    margin-left: 20px;
 }
 .ecard-float-review-name {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: #1e293b;
+    margin-bottom: 3px;
+}
+.ecard-float-review-stars {
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-bottom: 3px;
+    gap: 2px;
+    margin-bottom: 4px;
 }
 .ecard-float-review-text {
     font-size: 10px;
@@ -850,11 +851,12 @@
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 @keyframes ecard-floatAnim {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    50% { transform: translateY(-6px); }
 }
 .ecard-feedback-title {
     font-size: 16px;
