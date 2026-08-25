@@ -1028,16 +1028,21 @@ textarea.ecard-txt {
 /* ---- Admin Login Button ---- */
 .ecard-admin-login {
     text-align: center;
-    margin-top: 15px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 .ecard-admin-logo {
     width: 60px;
     height: 60px;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 50%;
-    display: inline-block;
-    vertical-align: middle;
-    opacity: 0.8;
+    display: block;
+    opacity: 0.9;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 .ecard-admin-login a, .ecard-admin-login button {
     display: inline-flex;
