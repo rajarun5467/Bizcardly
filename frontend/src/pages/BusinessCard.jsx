@@ -360,16 +360,19 @@ const BusinessCard = () => {
                 )}
               </div>
               <h2 className="ecard-business-name">{businessTitle}</h2>
-              {ownerName && (
-                <h3 className="ecard-owner-name">
-                  {ownerName}
-                  {business.ownerRole && <span style={{ fontSize: '16px' }}> - {business.ownerRole}</span>}
-                </h3>
-              )}
               {businessTagline && (
-                <p className="ecard-person-type">
-                  <span style={{ display: 'inline-block', animation: 'none' }}>{businessTagline}</span>
-                </p>
+                <h3 className="ecard-owner-name">{businessTagline}</h3>
+              )}
+              {business?.description && (
+                <div className="ecard-person-type">
+                  <div
+                    className="ecard-ticker-track"
+                    style={{ animationDuration: `${Math.min(60, Math.max(20, (business.description || '').length * 0.05))}s` }}
+                  >
+                    <span className="ecard-ticker-text">{business.description}</span>
+                    <span className="ecard-ticker-text" aria-hidden="true">{business.description}</span>
+                  </div>
+                </div>
               )}
             </div>
 
