@@ -44,6 +44,7 @@ const BusinessCard = () => {
   const [enquiryForm, setEnquiryForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
+  const [existingReviews, setExistingReviews] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const sectionsRef = useRef({});
@@ -131,6 +132,19 @@ const BusinessCard = () => {
         .catch(() => {});
     }
   }, [slug]);
+
+  useEffect(() => {
+    if (business?._id) {
+      fetch(`${API_BASE_URL}/reviews/${business._id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.reviews) {
+            setExistingReviews(data.reviews.slice(0, 2));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [business?._id]);
 
   const scrollToSection = (sectionId) => {
     const el = sectionsRef.current[sectionId];
@@ -618,6 +632,19 @@ const BusinessCard = () => {
               <h4 className="ecard-feedback-title">
                 <FaCommentDots /> Share Your Experience
               </h4>
+
+              {existingReviews.length > 0 && (
+                <div className="ecard-floating-reviews">
+                  {existingReviews.map((rev, idx) => (
+                    <div key={rev._id} className={`ecard-float-review-card ecard-float-${idx + 1}`}>
+                      <div className="ecard-float-review-name">
+                        <FaStar style={{ color: '#f59e0b', fontSize: '10px' }} /> {rev.name}
+                      </div>
+                      <p className="ecard-float-review-text">{rev.review}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="ecard-feedback-field">
                 <label>Your Rating</label>

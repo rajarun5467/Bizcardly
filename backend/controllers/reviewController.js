@@ -32,6 +32,20 @@ exports.submitReview = async (req, res) => {
   }
 };
 
+// @desc   Get public reviews for a business
+// @route  GET /api/reviews/:businessId
+// @access Public
+exports.getReviewsByBusiness = async (req, res) => {
+  try {
+    const reviews = await Review.find({ businessId: req.params.businessId })
+      .sort({ createdAt: -1 })
+      .limit(10);
+    res.json({ success: true, reviews, count: reviews.length });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // @desc   Get all reviews for the logged-in user's business
 // @route  GET /api/reviews
 // @access Private
