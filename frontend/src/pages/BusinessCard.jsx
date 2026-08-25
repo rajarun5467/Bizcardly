@@ -551,9 +551,6 @@ const BusinessCard = () => {
                 <div className="ecard-products-grid">
                   {business.products.slice(0, 4).map(product => (
                     <div key={product._id} className="ecard-product-card">
-                      {product.image && (
-                        <img src={assetUrl(product.image)} alt={product.name} />
-                      )}
                       <h6>{product.name}</h6>
                       {product.price && (
                         <p className="ecard-product-price">

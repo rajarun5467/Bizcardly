@@ -717,17 +717,6 @@
     font-size: 18px;
     margin-bottom: 10px;
 }
-.ecard-product-card img {
-    width: 100%;
-    height: 215px;
-    object-fit: contain;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    transition: 0.5s ease-in-out;
-}
-.ecard-product-card img:hover {
-    transform: scale(1.1);
-}
 .ecard-product-card h6 {
     font-size: 13px;
     font-weight: 700;
@@ -1347,9 +1336,6 @@ textarea.ecard-txt {
 @media only screen and (max-width: 768px) {
     .ecard-box, .ecard-box-dark {
         padding: 25px !important;
-    }
-    .ecard-product-card img {
-        height: 130px;
     }
     .ecard-form-row {
         grid-template-columns: 1fr;
