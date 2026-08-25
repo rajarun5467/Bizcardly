@@ -268,17 +268,23 @@ const BusinessCard = () => {
     setSubmittingEnquiry(true);
     try {
       if (business?._id) {
-        await fetch(`${API_BASE_URL}/enquiries/${business._id}`, {
+        const res = await fetch(`${API_BASE_URL}/enquiries/${business._id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(enquiryForm),
-        }).catch(() => {});
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Enquiry Sent', 'Your details have been submitted. We will contact you soon.', 'success');
+        } else {
+          showToast('Failed to Send', data.message || 'Please try again.', 'error');
+        }
+      } else {
+        showToast('Failed to Send', 'Business not loaded. Please refresh and try again.', 'error');
       }
-      showToast('Enquiry Sent', 'Your details have been submitted. We will contact you soon.', 'success');
       setEnquiryForm({ name: '', email: '', phone: '', subject: '', message: '' });
     } catch (err) {
-      showToast('Enquiry Sent', 'Your details have been submitted. We will contact you soon.', 'success');
-      setEnquiryForm({ name: '', email: '', phone: '', subject: '', message: '' });
+      showToast('Network Error', 'Unable to send enquiry. Please try again.', 'error');
     } finally {
       setSubmittingEnquiry(false);
     }

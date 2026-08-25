@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   FaEnvelope, FaPhone, FaUser, FaClock, FaTrashAlt, FaCheckCircle,
-  FaCircle, FaInbox, FaHeadset, FaEye
+  FaCircle, FaInbox, FaHeadset, FaEye, FaSync
 } from 'react-icons/fa';
 import { API_BASE_URL } from '../api/config';
 import toast from 'react-hot-toast';
@@ -9,23 +9,35 @@ import toast from 'react-hot-toast';
 const Enquiries = () => {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchEnquiries();
   }, []);
 
   const fetchEnquiries = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const token = localStorage.getItem('bizcardly_token');
+      if (!token) {
+        setError('You are not logged in.');
+        setLoading(false);
+        return;
+      }
       const res = await fetch(`${API_BASE_URL}/enquiries`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (data.success) {
         setEnquiries(data.enquiries);
+      } else {
+        setError(data.message || 'Failed to load enquiries.');
+        toast.error(data.message || 'Failed to load enquiries.');
       }
     } catch (err) {
-      console.error('Failed to fetch enquiries:', err);
+      setError('Network error. Please refresh or try again later.');
+      toast.error('Network error. Please refresh.');
     } finally {
       setLoading(false);
     }
@@ -120,10 +132,25 @@ const Enquiries = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="animate-slide-in-left">
-        <h2 className="text-2xl font-black text-[#11142f]">Enquiries</h2>
-        <p className="text-gray-600">Customer contact form submissions</p>
+      <div className="flex items-start justify-between animate-slide-in-left">
+        <div>
+          <h2 className="text-2xl font-black text-[#11142f]">Enquiries</h2>
+          <p className="text-gray-600">Customer contact form submissions</p>
+        </div>
+        <button
+          onClick={fetchEnquiries}
+          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
+          title="Refresh enquiries"
+        >
+          <FaSync /> Refresh
+        </button>
       </div>
+
+      {error && (
+        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600 ring-1 ring-red-200">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-lg bg-white p-5 shadow-[0_12px_28px_rgba(40,51,92,0.08)] ring-1 ring-slate-200/80">
