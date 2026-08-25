@@ -119,7 +119,7 @@ const BusinessCard = () => {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPos = window.scrollY + window.innerHeight / 3;
-      const sectionIds = ['home', 'about', 'products', 'services', 'gallery', 'videos', 'feedback', 'enquiry'];
+    const sectionIds = ['home', 'about', 'services', 'gallery', 'feedback', 'enquiry'];
       for (const id of sectionIds) {
         const el = sectionsRef.current[id];
         if (el) {
@@ -261,10 +261,8 @@ const BusinessCard = () => {
   const navItems = [
     { id: 'home', label: 'Home', icon: FaHome },
     { id: 'about', label: 'About', icon: FaAddressCard },
-    ...(business?.products?.length > 0 ? [{ id: 'products', label: 'Products', icon: FaBox }] : []),
     ...(business?.services?.length > 0 ? [{ id: 'services', label: 'Services', icon: FaConciergeBell }] : []),
-    ...(business?.gallery?.length > 0 ? [{ id: 'gallery', label: 'Gallery', icon: FaImages }] : []),
-    ...(business?.videos?.length > 0 ? [{ id: 'videos', label: 'Videos', icon: FaVideo }] : []),
+    ...((business?.gallery?.length > 0 || business?.videos?.length > 0) ? [{ id: 'gallery', label: 'Gallery', icon: FaImages }] : []),
     { id: 'feedback', label: 'Reviews', icon: FaStar },
     { id: 'enquiry', label: 'Enquiry', icon: FaHeadset },
   ];
@@ -521,7 +519,7 @@ const BusinessCard = () => {
 
             {aboutText && <p className="ecard-about-intro">{aboutText}</p>}
 
-            {/* Products as cards in about section */}
+            {/* Products as cards in about section (max 4) */}
             {business.products?.length > 0 && (
               <>
                 <h4 className="ecard-about-subheading">Our Products</h4>
@@ -564,34 +562,6 @@ const BusinessCard = () => {
             )}
           </section>
 
-          {/* ===== PRODUCTS SECTION (full list) ===== */}
-          {business.products?.length > 4 && (
-            <section
-              id="ecard-products"
-              ref={el => sectionsRef.current['products'] = el}
-              className="ecard-box ecard-box-dark"
-            >
-              <h2 className="ecard-heading">Products <span>All Items</span></h2>
-              <div className="ecard-divider" style={{ marginBottom: '30px' }} />
-              <div className="ecard-products-grid">
-                {business.products.map(product => (
-                  <div key={product._id} className="ecard-product-card">
-                    {product.image && (
-                      <img src={assetUrl(product.image)} alt={product.name} />
-                    )}
-                    <h6>{product.name}</h6>
-                    {product.price && (
-                      <p className="ecard-product-price">
-                        <FaRupeeSign style={{ fontSize: '12px' }} />{product.price}
-                      </p>
-                    )}
-                    {product.description && <p>{product.description}</p>}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
           {/* ===== SERVICES SECTION (full list) ===== */}
           {business.services?.length > 6 && (
             <section
@@ -618,44 +588,41 @@ const BusinessCard = () => {
             </section>
           )}
 
-          {/* ===== GALLERY SECTION ===== */}
-          {business.gallery?.length > 0 && (
+          {/* ===== GALLERY & VIDEOS COMBINED SECTION (max 4 each) ===== */}
+          {(business.gallery?.length > 0 || business.videos?.length > 0) && (
             <section
               id="ecard-gallery"
               ref={el => sectionsRef.current['gallery'] = el}
               className="ecard-box ecard-box-dark"
             >
-              <h2 className="ecard-heading">Gallery <span>Photos</span></h2>
+              <h2 className="ecard-heading">Gallery <span>Photos & Videos</span></h2>
               <div className="ecard-divider" style={{ marginBottom: '30px' }} />
-              <div className="ecard-gallery-grid">
-                {business.gallery.map((item, i) => (
-                  <div key={item._id || i} className="ecard-gallery-item">
-                    <img src={assetUrl(item.imageUrl || item.image)} alt={`Gallery ${i + 1}`} />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
 
-          {/* ===== VIDEOS SECTION ===== */}
-          {business.videos?.length > 0 && (
-            <section
-              id="ecard-videos"
-              ref={el => sectionsRef.current['videos'] = el}
-              className="ecard-box ecard-box-dark"
-            >
-              <h2 className="ecard-heading">Videos <span>Watch</span></h2>
-              <div className="ecard-divider" style={{ marginBottom: '30px' }} />
-              {business.videos.map(video => (
-                <div key={video._id} className="ecard-video-item">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${video.youtubeId || video.videoUrl?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1] || ''}`}
-                    title={video.title}
-                    allowFullScreen
-                  />
-                  <h5>{video.title}</h5>
+              {business.gallery?.length > 0 && (
+                <div className="ecard-gallery-grid" style={{ marginBottom: business.videos?.length > 0 ? '30px' : '0' }}>
+                  {business.gallery.slice(0, 4).map((item, i) => (
+                    <div key={item._id || i} className="ecard-gallery-item">
+                      <img src={assetUrl(item.imageUrl || item.image)} alt={`Gallery ${i + 1}`} />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+
+              {business.videos?.length > 0 && (
+                <>
+                  {business.gallery?.length > 0 && <h4 className="ecard-about-subheading" style={{ marginBottom: '20px' }}>Videos</h4>}
+                  {business.videos.slice(0, 4).map(video => (
+                    <div key={video._id} className="ecard-video-item">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${video.youtubeId || video.videoUrl?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1] || ''}`}
+                        title={video.title}
+                        allowFullScreen
+                      />
+                      <h5>{video.title}</h5>
+                    </div>
+                  ))}
+                </>
+              )}
             </section>
           )}
 
