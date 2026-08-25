@@ -364,25 +364,14 @@ const BusinessCard = () => {
                 <h3 className="ecard-owner-name">{businessTagline}</h3>
               )}
               {business?.description && (
-                <div className="ecard-ticker-options">
-                  {[
-                    { name: 'Coral Orange', gradient: 'linear-gradient(90deg, #FF512F, #F09819, #FF512F)', shadow: 'rgba(255, 81, 47, 0.2)' },
-                    { name: 'Royal Blue Indigo', gradient: 'linear-gradient(90deg, #2563EB, #4F46E5, #2563EB)', shadow: 'rgba(37, 99, 235, 0.2)' },
-                    { name: 'Emerald Green', gradient: 'linear-gradient(90deg, #059669, #10B981, #047857)', shadow: 'rgba(5, 150, 105, 0.2)' },
-                    { name: 'Pink Magenta', gradient: 'linear-gradient(90deg, #EC4899, #D946EF, #C026D3)', shadow: 'rgba(236, 72, 153, 0.2)' },
-                    { name: 'Purple Violet', gradient: 'linear-gradient(90deg, #7C3AED, #A855F7, #6D28D9)', shadow: 'rgba(124, 58, 237, 0.2)' },
-                  ].map((opt, idx) => (
-                    <div key={idx} className="ecard-person-type ecard-ticker-option" style={{ background: opt.gradient, backgroundSize: '300% 100%', boxShadow: `0 4px 14px ${opt.shadow}` }}>
-                      <span className="ecard-ticker-label">{opt.name}</span>
-                      <div
-                        className="ecard-ticker-track"
-                        style={{ animationDuration: `${Math.min(60, Math.max(20, (business.description || '').length * 0.05))}s` }}
-                      >
-                        <span className="ecard-ticker-text">{business.description}</span>
-                        <span className="ecard-ticker-text" aria-hidden="true">{business.description}</span>
-                      </div>
-                    </div>
-                  ))}
+                <div className="ecard-person-type">
+                  <div
+                    className="ecard-ticker-track"
+                    style={{ animationDuration: `${Math.min(60, Math.max(20, (business.description || '').length * 0.05))}s` }}
+                  >
+                    <span className="ecard-ticker-text">{business.description}</span>
+                    <span className="ecard-ticker-text" aria-hidden="true">{business.description}</span>
+                  </div>
                 </div>
               )}
             </div>

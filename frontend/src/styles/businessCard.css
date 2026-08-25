@@ -323,11 +323,19 @@
     opacity: 0.85;
 }
 .ecard-person-type {
-    margin: 8px 0 0;
+    margin: 20px 0 0;
     padding: 12px 24px;
-    color: #F0FDFA;
-    background: linear-gradient(90deg, #0F766E, #14B8A6, #0D9488, #115E59, #0F766E);
-    background-size: 300% 100%;
+    color: #fff;
+    background: linear-gradient(
+        90deg,
+        #FF512F, #F09819,
+        #2563EB, #4F46E5,
+        #059669, #10B981,
+        #EC4899, #D946EF,
+        #7C3AED, #A855F7,
+        #FF512F
+    );
+    background-size: 500% 100%;
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -335,31 +343,8 @@
     position: relative;
     overflow: hidden;
     white-space: nowrap;
-    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.2);
-    animation: ecard-ticker-bg 18s ease infinite;
-}
-.ecard-ticker-options {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 15px;
-}
-.ecard-ticker-option {
-    margin: 0;
-}
-.ecard-ticker-label {
-    position: absolute;
-    top: -8px;
-    left: 12px;
-    font-size: 10px;
-    font-weight: 700;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.35);
-    padding: 2px 8px;
-    border-radius: 4px;
-    z-index: 2;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    animation: ecard-ticker-bg 12s linear infinite;
 }
 .ecard-ticker-track {
     display: inline-flex;
@@ -371,8 +356,8 @@
     display: inline-block;
     padding: 0 8px;
     white-space: nowrap;
-    color: #F0FDFA;
-    font-weight: 600;
+    color: #fff;
+    font-weight: 700;
     font-size: 14px;
     letter-spacing: 0.4px;
 }
@@ -382,8 +367,7 @@
 }
 @keyframes ecard-ticker-bg {
     0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
 }
 .ecard-divider {
     width: 50%;
