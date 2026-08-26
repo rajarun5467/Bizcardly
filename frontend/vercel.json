@@ -1,7 +1,19 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/listing/:category/:slug/:location",
+      "destination": "/api/og"
+    },
+    {
+      "source": "/listing/:category/:slug",
+      "destination": "/api/og"
+    },
+    {
+      "source": "/listing/:category",
+      "destination": "/api/og"
+    },
+    {
+      "source": "/((?!listing|api|assets|src).*)",
       "destination": "/index.html"
     }
   ]
