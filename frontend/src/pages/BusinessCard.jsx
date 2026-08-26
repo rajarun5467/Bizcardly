@@ -451,7 +451,6 @@ const BusinessCard = () => {
                     style={{ animationDuration: `${Math.min(60, Math.max(20, (business.description || '').length * 0.05))}s` }}
                   >
                     <span className="ecard-ticker-text">{business.description}</span>
-                    <span className="ecard-ticker-text" aria-hidden="true">{business.description}</span>
                   </div>
                 </div>
               )}
