@@ -7,15 +7,18 @@ import { API_BASE_URL } from '../../api/config';
 const SuperAdminLogin = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
       const res = await fetch(`${API_BASE_URL}/superadmin/login`, {
         method: 'POST',
@@ -30,6 +33,7 @@ const SuperAdminLogin = () => {
       toast.success('Welcome back, SuperAdmin!');
       navigate('/superadmin/dashboard');
     } catch (err) {
+      setError(err.message);
       toast.error(err.message);
     } finally {
       setLoading(false);
@@ -46,6 +50,13 @@ const SuperAdminLogin = () => {
           <h1 className="text-2xl font-bold text-gray-800">SuperAdmin Portal</h1>
           <p className="text-gray-500 mt-2">BizCardly Platform Administration</p>
         </div>
+
+        {error && (
+          <div className="mb-5 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Admin Email</label>
