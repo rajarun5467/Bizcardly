@@ -338,7 +338,7 @@ const Subscription = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your UPI ID / Transaction Ref *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your UPI ID / Transaction Ref</label>
                   <input
                     type="text"
                     value={formData.transactionRef}
@@ -348,7 +348,7 @@ const Subscription = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Payment Screenshot *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Payment Screenshot</label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-indigo-400 transition cursor-pointer">
                     <input
                       type="file"

@@ -223,7 +223,7 @@ const Profile = () => {
 
                 <div className="grid gap-5 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-slate-700">Business Name <span className="text-red-500">*</span></label>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Business Name</label>
                     <input
                       type="text"
                                             value={formData.name}
@@ -233,7 +233,7 @@ const Profile = () => {
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-slate-700">Tagline <span className="text-red-500">*</span></label>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Tagline</label>
                     <input
                       type="text"
                                             value={formData.tagline}
@@ -244,7 +244,7 @@ const Profile = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-bold text-slate-700">Description <span className="text-red-500">*</span></label>
+                  <label className="mb-2 block text-sm font-bold text-slate-700">Description</label>
                   <textarea
                                         maxLength={500}
                     rows={4}
@@ -510,7 +510,7 @@ const Profile = () => {
                 <>
                   <div className="mb-6 grid gap-5 lg:grid-cols-2">
                     <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-[#f8f7ff] to-white p-4">
-                      <label className="mb-3 block text-sm font-bold text-slate-700">Profile Image <span className="text-red-500">*</span></label>
+                      <label className="mb-3 block text-sm font-bold text-slate-700">Profile Image</label>
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:flex-wrap">
                         <div className="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8e4ff] ring-1 ring-[#d6d1ff]">
                           {profilePreview ? (
@@ -553,7 +553,7 @@ const Profile = () => {
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-[#f8fbff] to-white p-4">
-                      <label className="mb-3 block text-sm font-bold text-slate-700">Logo <span className="text-red-500">*</span></label>
+                      <label className="mb-3 block text-sm font-bold text-slate-700">Logo</label>
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:flex-wrap">
                         <div className="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
                           {logoPreview ? (
@@ -598,7 +598,7 @@ const Profile = () => {
 
                   <div className="grid gap-5 md:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-sm font-bold text-slate-700">Business Name <span className="text-red-500">*</span></label>
+                      <label className="mb-2 block text-sm font-bold text-slate-700">Business Name</label>
                       <input
                         type="text"
                                                 value={formData.name}
@@ -608,7 +608,7 @@ const Profile = () => {
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-bold text-slate-700">Tagline <span className="text-red-500">*</span></label>
+                      <label className="mb-2 block text-sm font-bold text-slate-700">Tagline</label>
                       <input
                         type="text"
                                                 value={formData.tagline}
@@ -619,7 +619,7 @@ const Profile = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-slate-700">Description <span className="text-red-500">*</span></label>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Description</label>
                     <textarea
                                             maxLength={500}
                       rows={4}
@@ -636,7 +636,7 @@ const Profile = () => {
               {editingSection === 'contact-info' && (
                 <div className="grid gap-5 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-slate-700">Phone <span className="text-red-500">*</span></label>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Phone</label>
                     <div className="relative">
                       <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
@@ -649,7 +649,7 @@ const Profile = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-slate-700">WhatsApp <span className="text-red-500">*</span></label>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">WhatsApp</label>
                     <div className="relative">
                       <FaWhatsapp className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
@@ -662,7 +662,7 @@ const Profile = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-slate-700">Email <span className="text-red-500">*</span></label>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Email</label>
                     <div className="relative">
                       <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
@@ -675,7 +675,7 @@ const Profile = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-slate-700">Website <span className="text-red-500">*</span></label>
+                    <label className="mb-2 block text-sm font-bold text-slate-700">Website</label>
                     <div className="relative">
                       <FaGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
@@ -692,7 +692,7 @@ const Profile = () => {
 
               {editingSection === 'address-info' && (
                 <div>
-                  <label className="mb-2 block text-sm font-bold text-slate-700">Address <span className="text-red-500">*</span></label>
+                  <label className="mb-2 block text-sm font-bold text-slate-700">Address</label>
                   <div className="relative">
                     <input
                       type="text"

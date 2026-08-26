@@ -212,24 +212,24 @@ const Videos = () => {
             <h3 className="text-xl font-bold mb-4">Add YouTube Video</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Video Title *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Video Title</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                   placeholder="My awesome video"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">YouTube URL *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">YouTube URL</label>
                 <div className="relative">
                   <FaYoutube className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="url"
                     value={formData.url}
                     onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                     placeholder="https://youtube.com/watch?v=..."
                   />
                 </div>

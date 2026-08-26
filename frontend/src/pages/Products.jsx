@@ -221,23 +221,23 @@ const Products = () => {
               <h3 className="text-xl font-bold mb-4 text-gray-800">{editingProduct ? 'Edit Product' : 'Add Product'}</h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition hover:border-gray-400"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition hover:border-gray-400"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Price *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
                   <div className="relative">
                     <FaRupeeSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                       type="number"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition hover:border-gray-400"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition hover:border-gray-400"
                     />
                   </div>
                 </div>
