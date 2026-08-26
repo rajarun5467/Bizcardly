@@ -297,7 +297,7 @@
 }
 .ecard-profile-img {
     width: 170px;
-    border-radius: 16px;
+    border-radius: 50%;
     height: 170px;
     object-fit: contain;
     border: 4px solid var(--main-bg-color3);
