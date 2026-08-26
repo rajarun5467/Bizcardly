@@ -79,7 +79,7 @@ export default async (req, res) => {
     const bizName = escapeHtml(biz.name || biz.businessName || 'Digital Business Card');
     const tagline = escapeHtml(biz.tagline || '');
     const title = tagline ? `${bizName} - ${tagline}` : bizName;
-    const description = escapeHtml(biz.description || biz.about || `${bizName} - Digital Business Card powered by Bizcardly`);
+    const description = escapeHtml(biz.about || biz.description || `${bizName} - Digital Business Card powered by Bizcardly`);
     const canonicalUrl = 'https://bizcardly.vercel.app' + path;
 
     let ogImage = '';
