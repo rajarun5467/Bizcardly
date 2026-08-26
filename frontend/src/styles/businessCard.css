@@ -615,11 +615,6 @@
 }
 
 /* ---- About Section ---- */
-.ecard-about {
-    background: #E8EDD8;
-    border-radius: 16px;
-    padding: 24px;
-}
 .ecard-about p {
     font-size: 14px;
     text-align: justify;
@@ -637,12 +632,12 @@
     gap: 6px;
     padding: 4px 0;
     font-size: 15px;
-    color: #1A2332;
+    color: var(--black-color);
 }
 .ecard-about-info-item .ecard-label {
     flex-shrink: 0;
     font-weight: 600;
-    color: #1A2332;
+    color: var(--black-color);
 }
 .ecard-about-info-item .ecard-label::after {
     content: ' :';
@@ -650,22 +645,21 @@
 }
 .ecard-about-info-item .ecard-value {
     font-weight: 700;
-    color: #1A2332;
+    color: var(--black-color);
 }
 .ecard-about-intro {
-    background: #E8EDD8;
-    color: #1A2332;
+    color: var(--black-color);
     font-size: 14px;
     line-height: 1.7;
     text-align: justify;
-    padding: 18px;
-    border-radius: 12px;
-    border: 1px solid rgba(26, 35, 50, 0.08);
+    padding: 0;
+    border-radius: 0;
+    border: none;
     margin-bottom: 20px;
 }
 .ecard-about-intro strong {
     font-weight: 700;
-    color: #1A2332;
+    color: var(--black-color);
 }
 .ecard-about-subheading {
     font-size: 16px;
