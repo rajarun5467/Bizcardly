@@ -123,21 +123,18 @@ const SuperAdminUsers = () => {
     setModal({ type: null, user: null });
   };
 
-  const handleApprove = async (user) => {
-    try {
-      const token = localStorage.getItem('superadmin_token');
-      const res = await fetch(`${API_BASE_URL}/superadmin/users/${user._id}/approve`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      toast.success(data.message);
-      fetchUsers();
-    } catch (err) {
-      toast.error(err.message);
+  const handleStatusChange = async (user, newStatus) => {
+    if (newStatus === 'approve') {
+      await handleApprove(user);
+    } else if (newStatus === 'block' || newStatus === 'unblock') {
+      await handleBlockUnblock(user);
     }
-    setModal({ type: null, user: null });
+  };
+
+  const getUserStatus = (user) => {
+    if (!user.isApproved) return 'pending';
+    if (user.isBlocked) return 'blocked';
+    return 'approved';
   };
 
   const handleDelete = async (user) => {
@@ -375,19 +372,36 @@ const SuperAdminUsers = () => {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      {!user.isApproved ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                          <FaUserCircle className="text-[10px]" /> Pending
-                        </span>
-                      ) : user.isBlocked ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                          <FaBan className="text-[10px]" /> Blocked
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                          <FaCheckCircle className="text-[10px]" /> Active
-                        </span>
-                      )}
+                      <select
+                        value={getUserStatus(user)}
+                        onChange={(e) => handleStatusChange(user, e.target.value)}
+                        className={`text-xs font-medium px-2.5 py-1 rounded-lg outline-none cursor-pointer border ${
+                          !user.isApproved
+                            ? 'bg-amber-50 border-amber-200 text-amber-700'
+                            : user.isBlocked
+                            ? 'bg-red-50 border-red-200 text-red-700'
+                            : 'bg-green-50 border-green-200 text-green-700'
+                        }`}
+                      >
+                        {!user.isApproved && (
+                          <>
+                            <option value="pending" disabled>Pending</option>
+                            <option value="approve">Approve</option>
+                          </>
+                        )}
+                        {user.isApproved && user.isBlocked && (
+                          <>
+                            <option value="blocked" disabled>Blocked</option>
+                            <option value="unblock">Unblock</option>
+                          </>
+                        )}
+                        {user.isApproved && !user.isBlocked && (
+                          <>
+                            <option value="approved" disabled>Active</option>
+                            <option value="block">Block</option>
+                          </>
+                        )}
+                      </select>
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell text-slate-500 text-xs">
                       {new Date(user.createdAt).toLocaleDateString()}
