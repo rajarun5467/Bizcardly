@@ -135,7 +135,7 @@ const SuperAdminUserDetails = () => {
         <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
           {business && (
             <Link
-              to={`/business/${business.slug}`}
+              to={`/listing/${(business.category || 'uncategorized').toLowerCase().replace(/\s+/g, '-')}/${business.slug}`}
               target="_blank"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition text-sm font-medium"
             >

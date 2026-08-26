@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -67,7 +67,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/business/:slug" element={<BusinessCard />} />
+        <Route path="/listing/:category/:slug" element={<BusinessCard />} />
+        <Route path="/business/:slug" element={<OldBusinessRedirect />} />
         <Route
           path="/dashboard"
           element={

@@ -162,7 +162,7 @@ const Home = () => {
         <button onClick={() => handleCta('/register')} className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition shadow-lg shadow-indigo-200 text-base">
           Create Free Card <FaArrowRight />
         </button>
-        <button onClick={() => navigate('/business/stylecraft-hair-studio')} className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white text-slate-700 font-semibold border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition text-base">
+        <button onClick={() => navigate('/listing/salon/stylecraft-hair-studio')} className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white text-slate-700 font-semibold border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition text-base">
           View Demo
         </button>
       </div>

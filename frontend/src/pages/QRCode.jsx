@@ -10,7 +10,7 @@ const QRCode = () => {
 
   useEffect(() => {
     if (business && business.slug) {
-      setQrUrl(`${window.location.origin}/business/${business.slug}`);
+      setQrUrl(`${window.location.origin}/listing/${(business.category || 'uncategorized').toLowerCase().replace(/\s+/g, '-')}/${business.slug}`);
     }
   }, [business]);
 
