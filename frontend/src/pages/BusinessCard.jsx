@@ -571,6 +571,14 @@ const BusinessCard = () => {
             <h2 className="ecard-heading">About us <span>Know More</span></h2>
             <div className="ecard-divider" style={{ marginBottom: '30px' }} />
 
+            {(business?.category || business?.subcategory) && (
+              <p className="ecard-category-sub" style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px', textTransform: 'lowercase' }}>
+                {business.category && <span>{business.category}</span>}
+                {business.category && business.subcategory && <span> · </span>}
+                {business.subcategory && <span>{business.subcategory}</span>}
+              </p>
+            )}
+
             <div className="ecard-about-info-row">
               <div className="ecard-about-info-item">
                 <FaStore />

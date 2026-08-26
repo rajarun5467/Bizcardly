@@ -26,6 +26,10 @@ const businessSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    subcategory: {
+      type: String,
+      default: '',
+    },
     tagline: {
       type: String,
       default: '',

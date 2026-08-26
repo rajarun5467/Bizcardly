@@ -37,6 +37,8 @@ const Profile = () => {
     name: '',
     tagline: '',
     description: '',
+    category: '',
+    subcategory: '',
     phone: '',
     whatsapp: '',
     email: '',
@@ -62,6 +64,8 @@ const Profile = () => {
         name: business.name || business.businessName || '',
         tagline: business.tagline || '',
         description: business.description || business.about || '',
+        category: business.category || '',
+        subcategory: business.subcategory || '',
         phone: business.phone || '',
         whatsapp: business.whatsapp || business.socialLinks?.whatsapp || '',
         email: business.email || '',
@@ -129,6 +133,8 @@ const Profile = () => {
       data.append('name', formData.name || '');
       data.append('businessName', formData.name || '');
       data.append('tagline', formData.tagline || '');
+      data.append('category', formData.category || '');
+      data.append('subcategory', formData.subcategory || '');
       data.append('description', formData.description || '');
       data.append('about', formData.description || '');
       data.append('phone', formData.phone || '');
@@ -615,6 +621,28 @@ const Profile = () => {
                         onChange={(e) => updateField('tagline', e.target.value)}
                         className={inputClass}
                         placeholder="Smart Technology, Better Business."
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-slate-700">Category</label>
+                      <input
+                        type="text"
+                        value={formData.category}
+                        onChange={(e) => updateField('category', e.target.value)}
+                        className={inputClass}
+                        placeholder="e.g. IT Services, Retail, Manufacturing"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-slate-700">Subcategory</label>
+                      <input
+                        type="text"
+                        value={formData.subcategory}
+                        onChange={(e) => updateField('subcategory', e.target.value)}
+                        className={inputClass}
+                        placeholder="e.g. Web Development, Electronics, Furniture"
                       />
                     </div>
                   </div>
