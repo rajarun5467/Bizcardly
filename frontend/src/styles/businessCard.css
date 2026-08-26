@@ -351,6 +351,7 @@
     white-space: nowrap;
     animation: ecard-ticker-scroll 25s linear infinite;
     will-change: transform;
+    margin-left: 100%;
 }
 .ecard-ticker-text {
     display: inline-block;
@@ -362,8 +363,8 @@
     letter-spacing: 0.4px;
 }
 @keyframes ecard-ticker-scroll {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-1 * var(--marquee-distance, 200%))); }
 }
 .ecard-divider {
     width: 50%;
