@@ -124,6 +124,36 @@ const BusinessCard = () => {
   }, [slug, showToast]);
 
   useEffect(() => {
+    if (!business) return;
+    const title = business.name || business.businessName || 'Your Business';
+    document.title = title;
+
+    const logoUrl = assetUrl(business.logo || business.profileImage, 'ogImage');
+
+    const ensureMeta = (selector, attr, value, content) => {
+      let el = document.querySelector(selector);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, value);
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+
+    ensureMeta("meta[property='og:title']", 'property', 'og:title', title);
+    ensureMeta("meta[property='og:image']", 'property', 'og:image', logoUrl || '');
+    ensureMeta("meta[property='og:url']", 'property', 'og:url', window.location.href);
+
+    let favicon = document.querySelector("link[rel='icon']");
+    if (!favicon) {
+      favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      document.head.appendChild(favicon);
+    }
+    favicon.href = logoUrl || '/favicon.ico';
+  }, [business]);
+
+  useEffect(() => {
     if (slug) {
       fetch(`${API_BASE_URL}/visitors/${slug}`, { method: 'POST' })
         .then(() => {
