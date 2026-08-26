@@ -192,10 +192,6 @@ const Home = () => {
 
           <div className="hidden md:flex items-center gap-3">
             <button onClick={() => handleCta('/login')} className="text-sm font-medium text-slate-700 hover:text-indigo-600 transition">Login</button>
-            <button onClick={() => navigate('/customer/login')} className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition">Customer Login</button>
-            <button onClick={() => navigate('/customer/register')} className="text-sm font-semibold px-5 py-2.5 rounded-lg bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition shadow-sm">
-              Customer Register
-            </button>
             <button onClick={() => handleCta('/register')} className="text-sm font-semibold px-5 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 transition shadow-md">
               Get Started
             </button>
@@ -213,11 +209,9 @@ const Home = () => {
                 {link.label}
               </button>
             ))}
-            <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-              <button onClick={() => handleCta('/login')} className="w-full text-sm font-medium py-2.5 rounded-lg border border-slate-200 text-slate-700">Login</button>
-              <button onClick={() => navigate('/customer/login')} className="w-full text-sm font-medium py-2.5 rounded-lg border border-indigo-200 text-indigo-600">Customer Login</button>
-              <button onClick={() => navigate('/customer/register')} className="w-full text-sm font-semibold py-2.5 rounded-lg bg-white border border-indigo-200 text-indigo-600">Customer Register</button>
-              <button onClick={() => handleCta('/register')} className="w-full text-sm font-semibold py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white">Get Started</button>
+            <div className="flex gap-3 pt-2 border-t border-slate-100">
+              <button onClick={() => handleCta('/login')} className="flex-1 text-sm font-medium py-2.5 rounded-lg border border-slate-200 text-slate-700">Login</button>
+              <button onClick={() => handleCta('/register')} className="flex-1 text-sm font-semibold py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white">Get Started</button>
             </div>
           </div>
         )}
@@ -507,8 +501,6 @@ const Home = () => {
               <ul className="space-y-2 text-sm">
                 <li><button onClick={() => handleCta('/login')} className="hover:text-indigo-400 transition">Login</button></li>
                 <li><button onClick={() => handleCta('/register')} className="hover:text-indigo-400 transition">Create Free Card</button></li>
-                <li><button onClick={() => navigate('/customer/login')} className="hover:text-indigo-400 transition">Customer Login</button></li>
-                <li><button onClick={() => navigate('/customer/register')} className="hover:text-indigo-400 transition">Customer Register</button></li>
                 <li><Link to="/superadmin/login" className="hover:text-indigo-400 transition">Admin Portal</Link></li>
               </ul>
             </div>
