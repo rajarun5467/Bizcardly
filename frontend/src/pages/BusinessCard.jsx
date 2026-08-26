@@ -614,7 +614,7 @@ const BusinessCard = () => {
             <div className="ecard-divider" style={{ marginBottom: '30px' }} />
 
             {(business?.category || business?.subcategory) && (
-              <p className="ecard-category-sub" style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px', textTransform: 'lowercase' }}>
+              <p className="ecard-category-sub" style={{ textAlign: 'center', fontSize: '12px', color: 'var(--black-color)', marginBottom: '16px', textTransform: 'lowercase' }}>
                 {business.category && <span>{business.category}</span>}
                 {business.category && business.subcategory && <span> · </span>}
                 {business.subcategory && <span>{business.subcategory}</span>}
