@@ -1,7 +1,7 @@
-const https = require('https');
+import https from 'https';
 const API_HOST = 'bizcardly-1.onrender.com';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   let path = '/';
   try {
     const rawUrl = req.url || '/';
