@@ -30,10 +30,14 @@ import SuperAdminSettings from './pages/superadmin/SuperAdminSettings';
 import SuperAdminActivityLogs from './pages/superadmin/SuperAdminActivityLogs';
 import SuperAdminSubscriptions from './pages/superadmin/SuperAdminSubscriptions';
 import SuperAdminSupport from './pages/superadmin/SuperAdminSupport';
+import SuperAdminCustomers from './pages/superadmin/SuperAdminCustomers';
 import Support from './pages/Support';
 import Subscription from './pages/Subscription';
 import Reviews from './pages/Reviews';
 import Enquiries from './pages/Enquiries';
+import CustomerRegister from './pages/CustomerRegister';
+import CustomerLogin from './pages/CustomerLogin';
+import CustomerDashboard from './pages/CustomerDashboard';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -67,6 +71,9 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/customer/register" element={<CustomerRegister />} />
+        <Route path="/customer/login" element={<CustomerLogin />} />
+        <Route path="/customer/dashboard" element={<CustomerDashboard />} />
         <Route path="/business/:slug" element={<BusinessCard />} />
         <Route
           path="/dashboard"
@@ -108,6 +115,7 @@ function App() {
           <Route path="dashboard" element={<SuperAdminDashboard />} />
           <Route path="users" element={<SuperAdminUsers />} />
           <Route path="users/:id" element={<SuperAdminUserDetails />} />
+          <Route path="customers" element={<SuperAdminCustomers />} />
           <Route path="businesses" element={<SuperAdminBusinesses />} />
           <Route path="businesses/:id" element={<SuperAdminBusinessDetails />} />
           <Route path="analytics" element={<SuperAdminAnalytics />} />

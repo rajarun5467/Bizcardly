@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FaHome, FaUsers, FaBriefcase, FaChartBar, FaShieldAlt,
   FaCog, FaSignOutAlt, FaBars, FaTimes, FaBell, FaChevronDown,
-  FaClipboardList, FaCrown, FaHeadset,
+  FaClipboardList, FaCrown, FaHeadset, FaUserPlus,
 } from 'react-icons/fa';
 import { API_BASE_URL } from '../../api/config';
 import toast from 'react-hot-toast';
@@ -32,6 +32,7 @@ const SuperAdminLayout = () => {
   const menuItems = [
     { path: '/superadmin/dashboard', icon: FaHome, label: 'Dashboard' },
     { path: '/superadmin/users', icon: FaUsers, label: 'Users' },
+    { path: '/superadmin/customers', icon: FaUserPlus, label: 'Customers' },
     { path: '/superadmin/businesses', icon: FaBriefcase, label: 'Businesses' },
     { path: '/superadmin/subscriptions', icon: FaCrown, label: 'Subscriptions' },
     { path: '/superadmin/analytics', icon: FaChartBar, label: 'Analytics' },
