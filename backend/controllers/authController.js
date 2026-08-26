@@ -25,12 +25,15 @@ const generateUniqueSlug = async (name) => {
 exports.register = async (req, res) => {
   try {
     console.log('Register request body:', req.body);
-    const { name, email, password, confirmPassword } = req.body;
+    const { name, email, mobile, password, confirmPassword } = req.body;
 
     // Validation
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !mobile) {
       console.log('Missing required fields');
-      return res.status(400).json({ success: false, message: 'Please provide name, email and password' });
+      return res.status(400).json({ success: false, message: 'Please provide name, email, mobile and password' });
+    }
+    if (!/^[0-9]{10}$/.test(mobile)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit mobile number' });
     }
     if (password !== confirmPassword) {
       console.log('Passwords do not match');
@@ -48,16 +51,21 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
-    // Create user
+    const existingMobile = await User.findOne({ mobile });
+    if (existingMobile) {
+      return res.status(400).json({ success: false, message: 'Mobile number already registered' });
+    }
+
+    // Create user (not approved yet)
     console.log('Creating user...');
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name, email, mobile, password });
     console.log('User created:', user._id);
 
     // Create blank business profile with slug
     console.log('Creating business profile...');
     const slug = await generateUniqueSlug(name);
     console.log('Generated slug:', slug);
-    
+
     const business = await Business.create({
       userId: user._id,
       businessName: name + "'s Business",
@@ -69,14 +77,10 @@ exports.register = async (req, res) => {
     await ensureSubscription(user._id);
     console.log('Free subscription created for user:', user._id);
 
-    const token = generateToken(user._id, user.email, user.role);
-    console.log('Token generated');
-
     res.status(201).json({
       success: true,
-      message: 'Registration successful',
-      token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      message: 'Registration successful. Your account is pending admin approval.',
+      user: { id: user._id, name: user.name, email: user.email, mobile: user.mobile, isApproved: user.isApproved },
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -105,6 +109,15 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
+    if (!user.isApproved) {
+      console.log('User not approved:', email);
+      return res.status(403).json({
+        success: false,
+        message: 'Your account is pending admin approval. Please wait for superadmin approval.',
+        isApproved: false,
+      });
+    }
+
     if (user.isBlocked) {
       console.log('User is blocked:', email);
       return res.status(403).json({ success: false, message: 'Your account has been blocked. Please contact support.' });
@@ -124,7 +137,7 @@ exports.login = async (req, res) => {
       success: true,
       message: 'Login successful',
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: { id: user._id, name: user.name, email: user.email, mobile: user.mobile, role: user.role, isApproved: user.isApproved },
     });
   } catch (error) {
     console.error('Login error:', error);

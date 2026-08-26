@@ -123,6 +123,23 @@ const SuperAdminUsers = () => {
     setModal({ type: null, user: null });
   };
 
+  const handleApprove = async (user) => {
+    try {
+      const token = localStorage.getItem('superadmin_token');
+      const res = await fetch(`${API_BASE_URL}/superadmin/users/${user._id}/approve`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      toast.success(data.message);
+      fetchUsers();
+    } catch (err) {
+      toast.error(err.message);
+    }
+    setModal({ type: null, user: null });
+  };
+
   const handleDelete = async (user) => {
     try {
       const token = localStorage.getItem('superadmin_token');
@@ -253,6 +270,8 @@ const SuperAdminUsers = () => {
             className="px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 text-sm bg-white"
           >
             <option value="all">All Users</option>
+            <option value="pending">Pending Approval</option>
+            <option value="approved">Approved</option>
             <option value="active">Active</option>
             <option value="blocked">Blocked</option>
           </select>
@@ -356,7 +375,11 @@ const SuperAdminUsers = () => {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      {user.isBlocked ? (
+                      {!user.isApproved ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                          <FaUserCircle className="text-[10px]" /> Pending
+                        </span>
+                      ) : user.isBlocked ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
                           <FaBan className="text-[10px]" /> Blocked
                         </span>
@@ -385,6 +408,15 @@ const SuperAdminUsers = () => {
                         >
                           <FaKey className="text-sm" />
                         </button>
+                        {!user.isApproved && (
+                          <button
+                            onClick={() => setModal({ type: 'approve', user })}
+                            className="p-2 rounded-lg hover:bg-green-50 text-green-600 transition"
+                            title="Approve"
+                          >
+                            <FaCheckCircle className="text-sm" />
+                          </button>
+                        )}
                         <button
                           onClick={() => setModal({ type: 'block', user })}
                           className={`p-2 rounded-lg transition ${user.isBlocked ? 'hover:bg-green-50 text-green-600' : 'hover:bg-orange-50 text-orange-600'}`}
@@ -443,6 +475,15 @@ const SuperAdminUsers = () => {
         message={`Are you sure you want to ${modal.user?.isBlocked ? 'unblock' : 'block'} ${modal.user?.name}? ${modal.user?.isBlocked ? 'They will be able to login again.' : 'They will not be able to login.'}`}
         confirmText={modal.user?.isBlocked ? 'Unblock' : 'Block'}
         confirmColor={modal.user?.isBlocked ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'}
+      />
+      <ConfirmModal
+        open={modal.type === 'approve'}
+        onClose={() => setModal({ type: null, user: null })}
+        onConfirm={() => handleApprove(modal.user)}
+        title="Approve User"
+        message={`Are you sure you want to approve ${modal.user?.name}? They will be able to login after approval.`}
+        confirmText="Approve"
+        confirmColor="bg-green-600 hover:bg-green-700"
       />
       <ConfirmModal
         open={modal.type === 'delete'}

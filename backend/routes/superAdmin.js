@@ -4,12 +4,21 @@ const superAdminProtect = require('../middleware/superAdminAuth');
 const { uploadPayment } = require('../middleware/upload');
 const {
   login,
+  getMe,
   getDashboard,
   getUsers,
   getUserDetails,
   updateUserStatus,
+  approveUser,
   deleteUser,
   resetUserPassword,
+  bulkBlockUsers,
+  bulkUnblockUsers,
+  bulkDeleteUsers,
+  bulkAssignPlan,
+  exportUsers,
+  exportBusinesses,
+  exportSubscriptions,
   getBusinesses,
   getBusinessDetails,
   updateBusinessStatus,
@@ -19,8 +28,26 @@ const {
   deleteContent,
   getSettings,
   updateSettings,
+  getSubscriptions,
+  getSubscriptionStats,
+  getPlans,
+  updatePlan,
+  getUserSubscription,
+  assignPlan,
+  extendSubscription,
+  cancelSubscription,
+  reactivateSubscription,
+  getAllRequests,
+  getRequestById,
+  approveRequest,
+  rejectRequest,
+  getAllTickets,
+  getTicket,
+  adminReplyToTicket,
+  updateTicketStatus,
+  updateTicketPriority,
+  getTicketStats,
   getActivityLogs,
-  getMe,
 } = require('../controllers/superAdminController');
 
 const {
@@ -75,6 +102,7 @@ router.get('/dashboard', superAdminProtect, getDashboard);
 router.get('/users', superAdminProtect, getUsers);
 router.get('/users/:id', superAdminProtect, getUserDetails);
 router.patch('/users/:id/status', superAdminProtect, updateUserStatus);
+router.patch('/users/:id/approve', superAdminProtect, approveUser);
 router.patch('/users/:id/password', superAdminProtect, resetUserPassword);
 router.delete('/users/:id', superAdminProtect, deleteUser);
 

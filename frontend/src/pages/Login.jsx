@@ -8,16 +8,19 @@ import { API_BASE_URL } from '../api/config';
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
@@ -26,13 +29,11 @@ const Login = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed');
-      console.log('Login response:', data);
       await login(data.token, data.user);
-      console.log('Token stored after login:', localStorage.getItem('bizcardly_token'));
       toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (err) {
-      console.error('Login error:', err);
+      setError(err.message);
       toast.error(err.message);
     } finally {
       setLoading(false);
@@ -46,6 +47,13 @@ const Login = () => {
           <h1 className="text-3xl font-bold text-gray-800">Bizcardly</h1>
           <p className="text-gray-500 mt-2">Sign in to your dashboard</p>
         </div>
+
+        {error && (
+          <div className="mb-5 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6 animate-staggered">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>

@@ -17,6 +17,13 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
     },
+    mobile: {
+      type: String,
+      trim: true,
+      match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit mobile number'],
+      sparse: true,
+      unique: true,
+    },
     password: {
       type: String,
       required: [true, 'Password is required'],
@@ -27,6 +34,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['user', 'superadmin'],
       default: 'user',
+    },
+    isApproved: {
+      type: Boolean,
+      default: false,
     },
     isBlocked: {
       type: Boolean,

@@ -268,7 +268,9 @@ exports.getUsers = async (req, res) => {
     }
 
     if (status === 'blocked') query.isBlocked = true;
-    if (status === 'active') query.isBlocked = false;
+    else if (status === 'active') query.isBlocked = false;
+    else if (status === 'pending') query.isApproved = false;
+    else if (status === 'approved') query.isApproved = true;
 
     if (search) {
       query.$or = [
@@ -391,6 +393,42 @@ exports.updateUserStatus = async (req, res) => {
     });
   } catch (error) {
     console.error('Update user status error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc   Approve a user
+// @route  PATCH /api/superadmin/users/:id/approve
+// @access SuperAdmin
+exports.approveUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.role === 'superadmin') {
+      return res.status(400).json({ success: false, message: 'Cannot approve a SuperAdmin account' });
+    }
+
+    user.isApproved = true;
+    await user.save();
+
+    await logActivity(req.user._id, req.user.name, 'user_approved', 'user', user._id, `Approved user ${user.name} (${user.email})`);
+
+    res.json({
+      success: true,
+      message: `User ${user.name} approved successfully`,
+      user: { id: user._id, name: user.name, email: user.email, isApproved: user.isApproved, isBlocked: user.isBlocked },
+    });
+  } catch (error) {
+    console.error('Approve user error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
