@@ -21,7 +21,10 @@ module.exports = async (req, res) => {
       return res.status(200).send(fallback);
     }
 
-    const data = await fetchJson(API_HOST, '/api/business/slug/' + encodeURIComponent(slug));
+    const data = await Promise.race([
+      fetchJson(API_HOST, '/api/business/slug/' + encodeURIComponent(slug)),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Hard timeout')), 5000)),
+    ]);
 
     if (!data || !data.success || !data.business) {
       res.setHeader('Content-Type', 'text/html');
@@ -110,7 +113,7 @@ function fetchJson(hostname, apipath) {
     });
 
     request.on('error', (err) => reject(err));
-    request.setTimeout(8000, () => {
+    request.setTimeout(4000, () => {
       request.destroy();
       reject(new Error('Request timeout'));
     });
