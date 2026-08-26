@@ -1,5 +1,48 @@
 import https from 'https';
+import { readFileSync, existsSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const API_HOST = 'bizcardly-1.onrender.com';
+
+function loadBaseHtml() {
+  const candidates = [
+    join(__dirname, 'dist', 'index.html'),
+    join(__dirname, '..', 'dist', 'index.html'),
+    join(__dirname, '..', '..', 'dist', 'index.html'),
+    'dist/index.html',
+    '../dist/index.html',
+    '../../dist/index.html',
+  ];
+  for (const p of candidates) {
+    try {
+      if (existsSync(p)) return readFileSync(p, 'utf8');
+    } catch (e) {}
+  }
+  return null;
+}
+
+const BASE_HTML = loadBaseHtml();
+
+const FALLBACK_HTML = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bizcardly - Digital Business Card Platform</title>
+<meta name="description" content="Create your free digital business card and share it with a unique QR code and URL" />
+<meta property="og:title" content="Bizcardly - Digital Business Card Platform" />
+<meta property="og:description" content="Create your free digital business card and share it with a unique QR code and URL" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Bizcardly" />
+<meta name="twitter:card" content="summary" />
+</head>
+<body>
+<div id="root"></div>
+</body>
+</html>`;
 
 export default async (req, res) => {
   let path = '/';
@@ -54,43 +97,39 @@ export default async (req, res) => {
     return res.status(200).send(html);
   } catch (error) {
     console.error('OG handler error:', path, error.message);
-    const fallback = buildHtml('Bizcardly - Digital Business Card Platform', 'Create your free digital business card and share it with a unique QR code and URL', 'https://bizcardly.vercel.app' + path, '', '');
     res.setHeader('Content-Type', 'text/html');
     res.setHeader('Cache-Control', 's-maxage=60');
-    return res.status(200).send(fallback);
+    return res.status(200).send(BASE_HTML ? buildHtml('Bizcardly - Digital Business Card Platform', 'Create your free digital business card and share it with a unique QR code and URL', 'https://bizcardly.vercel.app' + path, '', '') : FALLBACK_HTML);
   }
 };
 
 function buildHtml(title, description, url, ogTitle, ogImage) {
   const imageMeta = ogImage
-    ? `<meta property="og:image" content="${escapeHtml(ogImage)}" />\n<meta name="twitter:image" content="${escapeHtml(ogImage)}" />`
+    ? `  <meta property="og:image" content="${escapeHtml(ogImage)}" />\n  <meta name="twitter:image" content="${escapeHtml(ogImage)}" />`
     : '';
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ctext%20y%3D%27.9em%27%20font-size%3D%2790%27%3E%F0%9F%92%BC%3C%2Ftext%3E%3C%2Fsvg%3E" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${escapeHtml(title)}</title>
-<meta name="description" content="${escapeHtml(description)}" />
-<meta property="og:title" content="${escapeHtml(ogTitle || title)}" />
-<meta property="og:description" content="${escapeHtml(description)}" />
-<meta property="og:type" content="profile" />
-<meta property="og:site_name" content="Bizcardly" />
-<meta property="og:url" content="${escapeHtml(url)}" />
+  const metaTags = `
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeHtml(description)}" />
+  <meta property="og:title" content="${escapeHtml(ogTitle || title)}" />
+  <meta property="og:description" content="${escapeHtml(description)}" />
+  <meta property="og:type" content="profile" />
+  <meta property="og:site_name" content="Bizcardly" />
+  <meta property="og:url" content="${escapeHtml(url)}" />
 ${imageMeta}
-<meta name="twitter:card" content="${ogImage ? 'summary_large_image' : 'summary'}" />
-<meta name="twitter:title" content="${escapeHtml(ogTitle || title)}" />
-<meta name="twitter:description" content="${escapeHtml(description)}" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
-</head>
-<body>
-<div id="root"></div>
-<script type="module" src="/src/main.jsx"></script>
-</body>
-</html>`;
+  <meta name="twitter:card" content="${ogImage ? 'summary_large_image' : 'summary'}" />
+  <meta name="twitter:title" content="${escapeHtml(ogTitle || title)}" />
+  <meta name="twitter:description" content="${escapeHtml(description)}" />`;
+
+  if (!BASE_HTML) {
+    return FALLBACK_HTML;
+  }
+
+  let html = BASE_HTML;
+  html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
+  html = html.replace(/<meta name="description"[^>]*>/i, `<meta name="description" content="${escapeHtml(description)}" />`);
+  html = html.replace(/<\/head>/i, `${metaTags}\n</head>`);
+
+  return html;
 }
 
 function fetchJson(hostname, apipath) {
