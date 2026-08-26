@@ -39,6 +39,7 @@ const Profile = () => {
     description: '',
     category: '',
     subcategory: '',
+    city: '',
     phone: '',
     whatsapp: '',
     email: '',
@@ -66,6 +67,7 @@ const Profile = () => {
         description: business.description || business.about || '',
         category: business.category || '',
         subcategory: business.subcategory || '',
+        city: business.city || '',
         phone: business.phone || '',
         whatsapp: business.whatsapp || business.socialLinks?.whatsapp || '',
         email: business.email || '',
@@ -135,6 +137,7 @@ const Profile = () => {
       data.append('tagline', formData.tagline || '');
       data.append('category', formData.category || '');
       data.append('subcategory', formData.subcategory || '');
+      data.append('city', formData.city || '');
       data.append('description', formData.description || '');
       data.append('about', formData.description || '');
       data.append('phone', formData.phone || '');
@@ -643,6 +646,18 @@ const Profile = () => {
                         onChange={(e) => updateField('subcategory', e.target.value)}
                         className={inputClass}
                         placeholder="e.g. Web Development, Electronics, Furniture"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-slate-700">City</label>
+                      <input
+                        type="text"
+                        value={formData.city}
+                        onChange={(e) => updateField('city', e.target.value)}
+                        className={inputClass}
+                        placeholder="e.g. Mumbai, Delhi, Pune"
                       />
                     </div>
                   </div>

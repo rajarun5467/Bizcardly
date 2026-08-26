@@ -81,7 +81,7 @@ exports.updateBusiness = async (req, res) => {
       
       // Create new business if doesn't exist
       const {
-        name, businessName, category, subcategory, tagline, about, description, phone, whatsapp,
+        name, businessName, category, subcategory, city, tagline, about, description, phone, whatsapp,
         email, website, address, mapUrl, openingHours, isPublished,
       } = req.body;
 
@@ -95,6 +95,7 @@ exports.updateBusiness = async (req, res) => {
         slug: slug,
         category: category || '',
         subcategory: subcategory || '',
+        city: city || '',
         tagline: tagline || '',
         description: description || '',
         about: about || '',
@@ -140,7 +141,7 @@ exports.updateBusiness = async (req, res) => {
     console.log(`🏢 Updating existing business: ${business._id}`);
 
     const {
-      businessName, name, category, subcategory, tagline, about, description, phone, whatsapp,
+      businessName, name, category, subcategory, city, tagline, about, description, phone, whatsapp,
       email, website, address, mapUrl, openingHours, isPublished,
       'socialLinks.instagram': instagram,
       'socialLinks.facebook': facebook,
@@ -165,6 +166,7 @@ exports.updateBusiness = async (req, res) => {
     }
     if (category !== undefined) business.category = category;
     if (subcategory !== undefined) business.subcategory = subcategory;
+    if (city !== undefined) business.city = city;
     if (tagline !== undefined) business.tagline = tagline;
     if (description !== undefined) business.description = description;
     if (about !== undefined) business.about = about;

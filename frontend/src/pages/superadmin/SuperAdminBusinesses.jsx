@@ -205,7 +205,7 @@ const SuperAdminBusinesses = () => {
                         <Link to={`/superadmin/businesses/${biz._id}`} className="p-2 rounded-lg hover:bg-indigo-50 text-indigo-600 transition" title="View Details">
                           <FaEye className="text-sm" />
                         </Link>
-                        <a href={`/listing/${(biz.category || 'uncategorized').toLowerCase().replace(/\s+/g, '-')}/${biz.slug}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition" title="Open Public Card">
+                        <a href={`/listing/${(biz.category || 'uncategorized').toLowerCase().replace(/\s+/g, '-')}/${biz.slug}/${(biz.city || 'unknown').toLowerCase().replace(/\s+/g, '-')}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition" title="Open Public Card">
                           <FaEye className="text-sm" />
                         </a>
                         <button

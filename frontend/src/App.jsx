@@ -62,7 +62,7 @@ function ScrollToTop() {
 
 function OldBusinessRedirect() {
   const { slug } = useParams();
-  return <Navigate to={`/listing/uncategorized/${slug}`} replace />;
+  return <Navigate to={`/listing/uncategorized/${slug}/unknown`} replace />;
 }
 
 function App() {
@@ -72,6 +72,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/listing/:category/:slug/:location" element={<BusinessCard />} />
         <Route path="/listing/:category/:slug" element={<BusinessCard />} />
         <Route path="/business/:slug" element={<OldBusinessRedirect />} />
         <Route
