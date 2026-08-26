@@ -60,6 +60,11 @@ function ScrollToTop() {
   return null;
 }
 
+function OldBusinessRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={`/listing/uncategorized/${slug}`} replace />;
+}
+
 function App() {
   return (
     <>
