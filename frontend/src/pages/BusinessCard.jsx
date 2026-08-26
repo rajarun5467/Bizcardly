@@ -49,6 +49,8 @@ const BusinessCard = () => {
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const sectionsRef = useRef({});
   const [revealRefs, setRevealRefs] = useState({});
+  const tickerContainerRef = useRef(null);
+  const tickerTextRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -122,6 +124,30 @@ const BusinessCard = () => {
       setLoading(false);
     }
   }, [slug, showToast]);
+
+  useEffect(() => {
+    if (!business?.description) return;
+    let resizeTimer;
+    const updateTickerGap = () => {
+      if (tickerContainerRef.current && tickerTextRef.current) {
+        const containerWidth = tickerContainerRef.current.offsetWidth;
+        const textWidth = tickerTextRef.current.offsetWidth;
+        const minGap = containerWidth - textWidth + 30;
+        const gap = Math.max(40, minGap);
+        tickerContainerRef.current.style.setProperty('--ticker-gap', `${gap}px`);
+      }
+    };
+    requestAnimationFrame(updateTickerGap);
+    const debouncedResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updateTickerGap, 150);
+    };
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(resizeTimer);
+    };
+  }, [business]);
 
   useEffect(() => {
     if (!business) return;
@@ -445,12 +471,12 @@ const BusinessCard = () => {
                 <h3 className="ecard-owner-name">{businessTagline}</h3>
               )}
               {business?.description && (
-                <div className="ecard-person-type">
+                <div className="ecard-person-type" ref={tickerContainerRef}>
                   <div
                     className="ecard-ticker-track"
                     style={{ animationDuration: `${Math.min(40, Math.max(10, (business.description || '').length * 0.03))}s` }}
                   >
-                    <span className="ecard-ticker-text">{business.description}</span>
+                    <span className="ecard-ticker-text" ref={tickerTextRef}>{business.description}</span>
                     <span className="ecard-ticker-text" aria-hidden="true">{business.description}</span>
                   </div>
                 </div>

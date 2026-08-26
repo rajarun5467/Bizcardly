@@ -354,7 +354,7 @@
 }
 .ecard-ticker-text {
     display: inline-block;
-    padding: 0 40px 0 8px;
+    padding: 0 var(--ticker-gap, 40px) 0 8px;
     white-space: nowrap;
     color: #fff;
     font-weight: 700;
