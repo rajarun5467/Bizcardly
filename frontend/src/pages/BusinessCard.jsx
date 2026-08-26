@@ -360,7 +360,7 @@ const BusinessCard = () => {
 
   const businessTitle = business?.name || business?.businessName || 'Your Business';
   const businessTagline = business?.tagline || '';
-  const aboutText = business?.description || business?.about || '';
+  const aboutText = business?.about || business?.description || '';
   const ownerName = business?.ownerName || business?.userId?.name || '';
   const phoneNumbers = business?.phone ? [business.phone, business?.phone2, business?.phone3].filter(Boolean) : [];
   const qr = business ? paymentQrUrl(business) : '';

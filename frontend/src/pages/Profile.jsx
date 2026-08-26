@@ -37,6 +37,7 @@ const Profile = () => {
     name: '',
     tagline: '',
     description: '',
+    about: '',
     category: '',
     subcategory: '',
     city: '',
@@ -64,7 +65,8 @@ const Profile = () => {
       setFormData({
         name: business.name || business.businessName || '',
         tagline: business.tagline || '',
-        description: business.description || business.about || '',
+        description: business.description || '',
+        about: business.about || '',
         category: business.category || '',
         subcategory: business.subcategory || '',
         city: business.city || '',
@@ -119,6 +121,13 @@ const Profile = () => {
     setShowModal(true);
   };
 
+  const sectionTitles = {
+    'business-info': 'Edit Business Information',
+    'contact-info': 'Edit Contact Information',
+    'address-info': 'Edit Business Address',
+    'about-info': 'Edit About Us',
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -139,7 +148,7 @@ const Profile = () => {
       data.append('subcategory', formData.subcategory || '');
       data.append('city', formData.city || '');
       data.append('description', formData.description || '');
-      data.append('about', formData.description || '');
+      data.append('about', formData.about || '');
       data.append('phone', formData.phone || '');
       data.append('whatsapp', formData.whatsapp || '');
       data.append('email', formData.email || '');
@@ -484,6 +493,27 @@ const Profile = () => {
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 sm:px-4">{business.address || '-'}</div>
           <MapPreview />
         </section>
+
+        <section className={cardClass}>
+          <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f0efff] text-[#6657f1]">
+                <FaBuilding />
+              </div>
+              <h2 className="text-base font-black text-[#11142f] sm:text-lg">About Us</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => openEditForm('about-info')}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#bdb7ff] bg-white px-5 py-3 text-sm font-bold text-[#6657f1] shadow-md transition-all duration-200 hover:bg-[#f6f4ff] hover:border-[#6657f1] hover:shadow-lg active:scale-95 sm:w-auto"
+            >
+              <FaEdit />
+              Edit
+            </button>
+          </div>
+          <p className="mb-2 text-sm font-bold text-slate-700">About</p>
+          <div className="max-h-60 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-700 sm:px-4 whitespace-pre-wrap">{business.about || '-'}</div>
+        </section>
       </div>
 
       {showModal && (
@@ -499,10 +529,7 @@ const Profile = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-bold text-gray-800">
-                    {editingSection === 'business-info' && 'Edit Business Information'}
-                    {editingSection === 'contact-info' && 'Edit Contact Information'}
-                    {editingSection === 'address-info' && 'Edit Business Address'}
-                    {!editingSection && 'Edit Information'}
+                    {editingSection ? sectionTitles[editingSection] : 'Edit Information'}
                   </h3>
                   <p className="text-sm text-gray-600">Update your business details</p>
                 </div>
@@ -746,6 +773,21 @@ const Profile = () => {
                     />
                     <FaMapMarkerAlt className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500" />
                   </div>
+                </div>
+              )}
+
+              {editingSection === 'about-info' && (
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-slate-700">About Us</label>
+                  <textarea
+                    rows={6}
+                    maxLength={1000}
+                    value={formData.about}
+                    onChange={(e) => updateField('about', e.target.value)}
+                    className={`${inputClass} resize-none leading-6`}
+                    placeholder="Tell customers about your business, products, services, experience..."
+                  />
+                  <p className="mt-1 text-right text-xs font-medium text-slate-500">{formData.about.length} / 1000</p>
                 </div>
               )}
 
