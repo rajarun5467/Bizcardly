@@ -105,6 +105,23 @@ const SuperAdminUsers = () => {
     fetchUsers();
   };
 
+  const handleApprove = async (user) => {
+    try {
+      const token = localStorage.getItem('superadmin_token');
+      const res = await fetch(`${API_BASE_URL}/superadmin/users/${user._id}/approve`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      toast.success(data.message);
+      fetchUsers();
+    } catch (err) {
+      toast.error(err.message);
+    }
+    setModal({ type: null, user: null });
+  };
+
   const handleBlockUnblock = async (user) => {
     try {
       const token = localStorage.getItem('superadmin_token');
