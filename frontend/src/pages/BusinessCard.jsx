@@ -31,6 +31,21 @@ const paymentQrUrl = (business) => {
   return '';
 };
 
+const escapeAboutIntro = (text, businessTitle) => {
+  const safe = String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br />');
+
+  if (!businessTitle) return safe;
+
+  const escapedTitle = String(businessTitle)
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedTitle})`, 'gi');
+  return safe.replace(regex, '<strong>$1</strong>');
+};
+
 const BusinessCard = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -608,33 +623,31 @@ const BusinessCard = () => {
 
             <div className="ecard-about-info-row">
               <div className="ecard-about-info-item">
-                <FaStore />
-                <div className="ecard-info-content">
-                  <span className="ecard-label">Business Name</span>
-                  <span className="ecard-value">{businessTitle}</span>
-                </div>
+                <span className="ecard-label">Business Name</span>
+                <span className="ecard-value">{businessTitle}</span>
               </div>
               {business.establishedYear && (
                 <div className="ecard-about-info-item">
-                  <FaCalendarAlt />
-                  <div className="ecard-info-content">
-                    <span className="ecard-label">Established</span>
-                    <span className="ecard-value">{business.establishedYear}</span>
-                  </div>
+                  <span className="ecard-label">Year of Est.</span>
+                  <span className="ecard-value">{business.establishedYear}</span>
                 </div>
               )}
               {business.businessType && (
                 <div className="ecard-about-info-item">
-                  <FaTags />
-                  <div className="ecard-info-content">
-                    <span className="ecard-label">Nature</span>
-                    <span className="ecard-value">{business.businessType}</span>
-                  </div>
+                  <span className="ecard-label">Nature of Business</span>
+                  <span className="ecard-value">{business.businessType}</span>
                 </div>
               )}
             </div>
 
-            {aboutText && <p className="ecard-about-intro">{aboutText}</p>}
+            {aboutText && (
+              <div
+                className="ecard-about-intro"
+                dangerouslySetInnerHTML={{
+                  __html: escapeAboutIntro(aboutText, businessTitle),
+                }}
+              />
+            )}
 
             {/* Services as checklist */}
             {business.services?.length > 0 && (

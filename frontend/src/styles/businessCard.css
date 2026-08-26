@@ -615,6 +615,11 @@
 }
 
 /* ---- About Section ---- */
+.ecard-about {
+    background: #E8EDD8;
+    border-radius: 16px;
+    padding: 24px;
+}
 .ecard-about p {
     font-size: 14px;
     text-align: justify;
@@ -622,46 +627,45 @@
 }
 .ecard-about-info-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 22px;
 }
 .ecard-about-info-item {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--main-bg-color3);
-    padding: 10px 14px;
-    border-radius: 8px;
-    flex: 1 1 150px;
-}
-.ecard-about-info-item i, .ecard-about-info-item svg {
-    font-size: 18px;
-    color: var(--accent-color);
-    flex-shrink: 0;
-}
-.ecard-about-info-item .ecard-info-content {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
+    align-items: baseline;
+    gap: 6px;
+    padding: 4px 0;
+    font-size: 15px;
+    color: #1A2332;
 }
 .ecard-about-info-item .ecard-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--secondary-text);
+    flex-shrink: 0;
+    font-weight: 600;
+    color: #1A2332;
+}
+.ecard-about-info-item .ecard-label::after {
+    content: ' :';
+    margin-left: 2px;
 }
 .ecard-about-info-item .ecard-value {
-    font-size: 14px;
     font-weight: 700;
-    color: var(--black-color);
+    color: #1A2332;
 }
 .ecard-about-intro {
+    background: #E8EDD8;
+    color: #1A2332;
     font-size: 14px;
+    line-height: 1.7;
     text-align: justify;
-    line-height: 1.6;
-    color: var(--black-color);
-    margin-bottom: 25px;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(26, 35, 50, 0.08);
+    margin-bottom: 20px;
+}
+.ecard-about-intro strong {
+    font-weight: 700;
+    color: #1A2332;
 }
 .ecard-about-subheading {
     font-size: 16px;
