@@ -21,12 +21,6 @@ const {
   deleteContent,
   getSettings,
   updateSettings,
-  getAllTickets,
-  getTicket,
-  adminReplyToTicket,
-  updateTicketStatus,
-  updateTicketPriority,
-  getTicketStats,
   getActivityLogs,
 } = require('../controllers/superAdminController');
 
