@@ -343,8 +343,7 @@ const Subscription = () => {
                     type="text"
                     value={formData.transactionRef}
                     onChange={(e) => setFormData({ ...formData, transactionRef: e.target.value })}
-                    required
-                    placeholder="e.g. yourname@upi or UTR number"
+                                        placeholder="e.g. yourname@upi or UTR number"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                   />
                 </div>

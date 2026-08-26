@@ -226,8 +226,7 @@ const Profile = () => {
                     <label className="mb-2 block text-sm font-bold text-slate-700">Business Name <span className="text-red-500">*</span></label>
                     <input
                       type="text"
-                      required
-                      value={formData.name}
+                                            value={formData.name}
                       onChange={(e) => updateField('name', e.target.value)}
                       className={inputClass}
                       placeholder="Raj Tech Solutions"
@@ -237,8 +236,7 @@ const Profile = () => {
                     <label className="mb-2 block text-sm font-bold text-slate-700">Tagline <span className="text-red-500">*</span></label>
                     <input
                       type="text"
-                      required
-                      value={formData.tagline}
+                                            value={formData.tagline}
                       onChange={(e) => updateField('tagline', e.target.value)}
                       className={inputClass}
                       placeholder="Smart Technology, Better Business."
@@ -248,8 +246,7 @@ const Profile = () => {
                 <div>
                   <label className="mb-2 block text-sm font-bold text-slate-700">Description <span className="text-red-500">*</span></label>
                   <textarea
-                    required
-                    maxLength={500}
+                                        maxLength={500}
                     rows={4}
                     value={formData.description}
                     onChange={(e) => updateField('description', e.target.value)}
@@ -604,8 +601,7 @@ const Profile = () => {
                       <label className="mb-2 block text-sm font-bold text-slate-700">Business Name <span className="text-red-500">*</span></label>
                       <input
                         type="text"
-                        required
-                        value={formData.name}
+                                                value={formData.name}
                         onChange={(e) => updateField('name', e.target.value)}
                         className={inputClass}
                         placeholder="Raj Tech Solutions"
@@ -615,8 +611,7 @@ const Profile = () => {
                       <label className="mb-2 block text-sm font-bold text-slate-700">Tagline <span className="text-red-500">*</span></label>
                       <input
                         type="text"
-                        required
-                        value={formData.tagline}
+                                                value={formData.tagline}
                         onChange={(e) => updateField('tagline', e.target.value)}
                         className={inputClass}
                         placeholder="Smart Technology, Better Business."
@@ -626,8 +621,7 @@ const Profile = () => {
                   <div>
                     <label className="mb-2 block text-sm font-bold text-slate-700">Description <span className="text-red-500">*</span></label>
                     <textarea
-                      required
-                      maxLength={500}
+                                            maxLength={500}
                       rows={4}
                       value={formData.description}
                       onChange={(e) => updateField('description', e.target.value)}
@@ -647,8 +641,7 @@ const Profile = () => {
                       <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
                         type="tel"
-                        required
-                        value={formData.phone}
+                                                value={formData.phone}
                         onChange={(e) => updateField('phone', e.target.value)}
                         className={iconInputClass}
                         placeholder="+91 98765 43210"
@@ -661,8 +654,7 @@ const Profile = () => {
                       <FaWhatsapp className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
                         type="tel"
-                        required
-                        value={formData.whatsapp}
+                                                value={formData.whatsapp}
                         onChange={(e) => updateField('whatsapp', e.target.value)}
                         className={iconInputClass}
                         placeholder="+91 98765 43210"
@@ -675,8 +667,7 @@ const Profile = () => {
                       <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
                         type="email"
-                        required
-                        value={formData.email}
+                                                value={formData.email}
                         onChange={(e) => updateField('email', e.target.value)}
                         className={iconInputClass}
                         placeholder="contact@rajtechsolutions.com"
@@ -689,8 +680,7 @@ const Profile = () => {
                       <FaGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
                         type="url"
-                        required
-                        value={formData.website}
+                                                value={formData.website}
                         onChange={(e) => updateField('website', e.target.value)}
                         className={iconInputClass}
                         placeholder="https://www.rajtechsolutions.com"
@@ -706,8 +696,7 @@ const Profile = () => {
                   <div className="relative">
                     <input
                       type="text"
-                      required
-                      value={formData.address}
+                                            value={formData.address}
                       onChange={(e) => updateField('address', e.target.value)}
                       className={`${inputClass} pr-11`}
                       placeholder="Lucknow, Uttar Pradesh, India"
