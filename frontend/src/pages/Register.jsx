@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { FaEnvelope, FaLock, FaUser, FaArrowRight } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaUser, FaArrowRight, FaPhone } from 'react-icons/fa';
 import { API_BASE_URL } from '../api/config';
 
 const Register = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', mobile: '', password: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, message: '' });
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const checkPasswordStrength = (password) => {
@@ -45,12 +43,16 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    if (!/^[0-9]{10}$/.test(formData.mobile)) {
+      return toast.error('Please enter a valid 10-digit mobile number');
+    }
+
     // Password validation with helpful messages
     if (formData.password.length < 8) {
       return toast.error('Password must be at least 8 characters long');
     }
-    
+
     const strength = checkPasswordStrength(formData.password);
     if (strength.score < 3) {
       const missingRequirements = [];
@@ -59,26 +61,25 @@ const Register = () => {
       if (!strength.checks.lowercase) missingRequirements.push('lowercase letter');
       if (!strength.checks.number) missingRequirements.push('number');
       if (!strength.checks.special) missingRequirements.push('special character (!@#$%^&*)');
-      
+
       return toast.error(`Password is too weak. Please include: ${missingRequirements.join(', ')}`);
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       return toast.error('Passwords do not match');
     }
-    
+
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/register`, {
+      const res = await fetch(`${API_BASE_URL}/customers/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password, confirmPassword: formData.confirmPassword }),
+        body: JSON.stringify(formData),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Registration failed');
-      await login(data.token, data.user);
-      toast.success('Account created successfully!');
-      navigate('/dashboard');
+      toast.success(data.message || 'Registration successful. Waiting for admin approval.');
+      navigate('/customer/login');
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -118,9 +119,25 @@ const Register = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition hover:border-gray-400"
                 placeholder="you@example.com"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Mobile Number *</label>
+            <div className="relative group">
+              <FaPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition" />
+              <input
+                type="tel"
+                name="mobile"
+                value={formData.mobile}
+                onChange={handleChange}
+                required
+                pattern="[0-9]{10}"
+                inputMode="numeric"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition hover:border-gray-400"
+                placeholder="9876543210"
               />
             </div>
           </div>
@@ -216,7 +233,7 @@ const Register = () => {
         </form>
         <p className="text-center mt-6 text-gray-600 animate-fade-in">
           Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 hover:text-indigo-700 font-medium hover-color-change transition">
+          <Link to="/customer/login" className="text-indigo-600 hover:text-indigo-700 font-medium hover-color-change transition">
             Sign in
           </Link>
         </p>
