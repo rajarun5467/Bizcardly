@@ -345,6 +345,8 @@
     overflow: hidden;
     white-space: nowrap;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
     animation: ecard-ticker-bg 12s linear infinite;
 }
 .ecard-ticker-track {
@@ -363,8 +365,8 @@
     letter-spacing: 0.4px;
 }
 @keyframes ecard-ticker-scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
 }
 @keyframes ecard-ticker-bg {
     0% { background-position: 0% 50%; }
