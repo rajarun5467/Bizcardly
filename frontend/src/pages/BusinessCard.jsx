@@ -229,14 +229,14 @@ const BusinessCard = () => {
 
   const handleReviewSubmit = async (e) => {
     e?.preventDefault();
-    if (!reviewForm.name.trim() || !rating || !reviewForm.review.trim()) {
-      showToast('Validation Failed', 'Please complete all fields and select a rating.', 'warning');
+    if (!reviewForm.name.trim() || !reviewForm.email.trim() || !rating || !reviewForm.review.trim()) {
+      showToast('Validation Failed', 'Please complete all fields, provide your email, and select a rating.', 'warning');
       return;
     }
     setSubmittingReview(true);
     try {
       if (business?._id) {
-        await fetch(`${API_BASE_URL}/reviews/${business._id}`, {
+        const res = await fetch(`${API_BASE_URL}/reviews/${business._id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -245,15 +245,21 @@ const BusinessCard = () => {
             rating,
             review: reviewForm.review,
           }),
-        }).catch(() => {});
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Review Posted', 'Thank you! Your review has been submitted.', 'success');
+          setReviewForm({ name: '', email: '', review: '' });
+          setRating(0);
+        } else {
+          const type = res.status === 409 ? 'warning' : 'error';
+          showToast(res.status === 409 ? 'Already Reviewed' : 'Failed to Post', data.message || 'Please try again.', type);
+        }
+      } else {
+        showToast('Failed to Post', 'Business not loaded. Please refresh and try again.', 'error');
       }
-      showToast('Review Posted', 'Thank you! Your review has been submitted.', 'success');
-      setReviewForm({ name: '', email: '', review: '' });
-      setRating(0);
     } catch (err) {
-      showToast('Review Posted', 'Thank you! Your review has been submitted.', 'success');
-      setReviewForm({ name: '', email: '', review: '' });
-      setRating(0);
+      showToast('Network Error', 'Unable to post review. Please try again.', 'error');
     } finally {
       setSubmittingReview(false);
     }
@@ -672,6 +678,7 @@ const BusinessCard = () => {
                 <input
                   id="ecard-review-email"
                   type="email"
+                  required
                   className="ecard-txt"
                   placeholder="Your Email"
                   value={reviewForm.email}

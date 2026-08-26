@@ -13,15 +13,25 @@ exports.submitReview = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Name, rating, and review are required.' });
     }
 
+    const normalizedEmail = email ? email.trim().toLowerCase() : '';
+    if (!normalizedEmail) {
+      return res.status(400).json({ success: false, message: 'Please provide an email address.' });
+    }
+
     const business = await Business.findById(businessId);
     if (!business) {
       return res.status(404).json({ success: false, message: 'Business not found.' });
     }
 
+    const existingReview = await Review.findOne({ businessId: business._id, email: normalizedEmail });
+    if (existingReview) {
+      return res.status(409).json({ success: false, message: 'You have already submitted a review using this email address. Only one review is allowed per email.' });
+    }
+
     const newReview = await Review.create({
       businessId: business._id,
       name,
-      email: email || '',
+      email: normalizedEmail,
       rating: Number(rating),
       review,
     });
