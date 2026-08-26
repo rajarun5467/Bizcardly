@@ -398,9 +398,9 @@ const BusinessCard = () => {
           >
             <div>
               <div className="ecard-profile">
-                {business.profileImage || business.logo ? (
+                {business.logo || business.profileImage ? (
                   <img
-                    src={assetUrl(business.profileImage || business.logo)}
+                    src={assetUrl(business.logo || business.profileImage)}
                     alt={businessTitle}
                     className="ecard-profile-img"
                   />
