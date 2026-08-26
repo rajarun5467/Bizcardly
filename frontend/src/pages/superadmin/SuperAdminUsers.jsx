@@ -339,6 +339,7 @@ const SuperAdminUsers = () => {
                   </th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">User</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden md:table-cell">Business</th>
+                  <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden md:table-cell">Mobile</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600">Status</th>
                   <th className="text-left px-4 py-3 font-semibold text-slate-600 hidden lg:table-cell">Joined</th>
                   <th className="text-right px-4 py-3 font-semibold text-slate-600">Actions</th>
@@ -370,6 +371,9 @@ const SuperAdminUsers = () => {
                       ) : (
                         <span className="text-slate-400 text-xs">No business</span>
                       )}
+                    </td>
+                    <td className="px-4 py-3 hidden md:table-cell text-slate-700 text-xs">
+                      {user.mobile || <span className="text-slate-400">—</span>}
                     </td>
                     <td className="px-4 py-3">
                       <select
