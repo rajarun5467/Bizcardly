@@ -44,6 +44,12 @@ const FALLBACK_HTML = `<!doctype html>
 </body>
 </html>`;
 
+const BOT_PATTERN = /bot|crawler|spider|crawling|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|discordbot|telegrambot|whatsapp|pinterest|googlebot|bingbot|duckduckbot|baiduspider|yandex|applebot|embedly|quora link preview|showyoubot|outbrain|vkshare|w3c_validator/i;
+
+function isBot(userAgent) {
+  return BOT_PATTERN.test(userAgent || '');
+}
+
 export default async (req, res) => {
   let path = '/';
   try {
@@ -58,10 +64,11 @@ export default async (req, res) => {
 
     const fallback = buildHtml('Bizcardly - Digital Business Card Platform', 'Create your free digital business card and share it with a unique QR code and URL', 'https://bizcardly.vercel.app' + path, '', '');
 
-    if (!slug) {
+    // Real users get the app shell instantly — only crawlers need OG meta tags
+    if (!slug || !isBot(req.headers['user-agent'])) {
       res.setHeader('Content-Type', 'text/html');
       res.setHeader('Cache-Control', 's-maxage=3600');
-      return res.status(200).send(fallback);
+      return res.status(200).send(BASE_HTML || fallback);
     }
 
     const data = await Promise.race([
