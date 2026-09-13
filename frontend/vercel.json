@@ -1,7 +1,8 @@
 {
   "functions": {
     "api/og.js": {
-      "includeFiles": "dist/index.html"
+      "includeFiles": "dist/index.html",
+      "maxDuration": 30
     }
   },
   "rewrites": [

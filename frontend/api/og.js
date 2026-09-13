@@ -50,6 +50,35 @@ function isBot(userAgent) {
   return BOT_PATTERN.test(userAgent || '');
 }
 
+// Fire-and-forget ping to wake the Render backend (free tier sleeps after inactivity)
+function warmBackend() {
+  try {
+    const req = https.request({
+      hostname: API_HOST,
+      path: '/api/business/slug/ping',
+      method: 'GET',
+      timeout: 3000,
+    }, (response) => { response.resume(); });
+    req.on('error', () => {});
+    req.on('timeout', () => req.destroy());
+    req.end();
+  } catch (e) {}
+}
+
+async function fetchBusiness(slug) {
+  const apiPath = '/api/business/slug/' + encodeURIComponent(slug);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const data = await Promise.race([
+        fetchJson(API_HOST, apiPath),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Hard timeout')), 8000)),
+      ]);
+      if (data && data.success && data.business) return data;
+    } catch (e) {}
+  }
+  return null;
+}
+
 export default async (req, res) => {
   let path = '/';
   try {
@@ -62,6 +91,9 @@ export default async (req, res) => {
       slug = parts[2];
     }
 
+    // Wake the backend on every hit so subsequent requests are fast
+    warmBackend();
+
     const fallback = buildHtml('Bizcardly - Digital Business Card Platform', 'Create your free digital business card and share it with a unique QR code and URL', 'https://bizcardly.vercel.app' + path, '', '');
 
     // Real users get the app shell instantly — only crawlers need OG meta tags
@@ -71,14 +103,12 @@ export default async (req, res) => {
       return res.status(200).send(BASE_HTML || fallback);
     }
 
-    const data = await Promise.race([
-      fetchJson(API_HOST, '/api/business/slug/' + encodeURIComponent(slug)),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Hard timeout')), 5000)),
-    ]);
+    const data = await fetchBusiness(slug);
 
     if (!data || !data.success || !data.business) {
       res.setHeader('Content-Type', 'text/html');
-      res.setHeader('Cache-Control', 's-maxage=3600');
+      // Short cache so the next crawler hit retries instead of serving a stale fallback
+      res.setHeader('Cache-Control', 's-maxage=60');
       return res.status(200).send(fallback);
     }
 
