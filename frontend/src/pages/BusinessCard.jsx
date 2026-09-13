@@ -51,7 +51,7 @@ const BusinessCard = () => {
   const navigate = useNavigate();
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [activeSection, setActiveSection] = useState('home');
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
