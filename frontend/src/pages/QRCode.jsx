@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { QRCodeSVG } from 'qrcode.react';
 import { FaDownload, FaShareAlt, FaExternalLinkAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { listingUrl } from '../utils/slugify';
 
 const QRCode = () => {
   const { business } = useAuth();
@@ -10,7 +11,7 @@ const QRCode = () => {
 
   useEffect(() => {
     if (business && business.slug) {
-      setQrUrl(`${window.location.origin}/listing/${(business.category || 'uncategorized').toLowerCase().replace(/\s+/g, '-')}/${business.slug}/${(business.city || 'unknown').toLowerCase().replace(/\s+/g, '-')}`);
+      setQrUrl(listingUrl(business, window.location.origin));
     }
   }, [business]);
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../api/config';
+import { listingUrl } from '../utils/slugify';
 import {
   FaArrowRight, FaBox, FaChartLine, FaCog, FaConciergeBell, FaCreditCard,
   FaEye, FaImages, FaMapMarkerAlt, FaMousePointer, FaQrcode, FaShareAlt,
@@ -141,7 +142,7 @@ const Overview = () => {
           <h3 className="text-lg font-black text-[#11142f]">Manage Your Digital Card</h3>
           {business.slug && (
             <a
-              href={`${window.location.origin}/listing/${(business.category || 'uncategorized').toLowerCase().replace(/\s+/g, '-')}/${business.slug}/${(business.city || 'unknown').toLowerCase().replace(/\s+/g, '-')}`}
+              href={listingUrl(business, window.location.origin)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#151936] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-300 transition hover:-translate-y-0.5"

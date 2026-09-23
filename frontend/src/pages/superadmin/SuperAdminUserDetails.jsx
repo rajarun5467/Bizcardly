@@ -6,6 +6,7 @@ import {
   FaImages, FaVideo, FaEye as FaVisitors,
 } from 'react-icons/fa';
 import { API_BASE_URL } from '../../api/config';
+import { listingUrl } from '../../utils/slugify';
 import toast from 'react-hot-toast';
 
 const ConfirmModal = ({ open, onClose, onConfirm, title, message, confirmText, confirmColor }) => {
@@ -135,7 +136,7 @@ const SuperAdminUserDetails = () => {
         <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
           {business && (
             <Link
-              to={`/listing/${(business.category || 'uncategorized').toLowerCase().replace(/\s+/g, '-')}/${business.slug}/${(business.city || 'unknown').toLowerCase().replace(/\s+/g, '-')}`}
+              to={listingUrl(business)}
               target="_blank"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition text-sm font-medium"
             >

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { API_BASE_URL } from '../api/config';
 import { getImageUrl } from '../utils/imageUrl';
 import Particles from '../components/Particles';
@@ -47,8 +47,16 @@ const escapeAboutIntro = (text, businessTitle) => {
 };
 
 const BusinessCard = () => {
-  const { slug } = useParams();
+  const { slug: paramSlug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Catch-all route (/listing/*) has no :slug param — derive it from the path.
+  // Slug is the second-to-last segment (location is last); for 3-part URLs it's last.
+  const slug = paramSlug || (() => {
+    const parts = location.pathname.split('/').filter(Boolean);
+    if (parts[0] !== 'listing' || parts.length < 3) return undefined;
+    return parts.length >= 4 ? parts[parts.length - 2] : parts[2];
+  })();
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState('light');

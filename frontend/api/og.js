@@ -88,7 +88,9 @@ export default async (req, res) => {
 
     let slug = null;
     if (parts[0] === 'listing' && parts.length >= 3) {
-      slug = parts[2];
+      // Old URLs could contain '/' inside the category segment, so the slug
+      // is always the second-to-last segment (location is last).
+      slug = parts.length >= 4 ? parts[parts.length - 2] : parts[2];
     }
 
     // Wake the backend on every hit so subsequent requests are fast

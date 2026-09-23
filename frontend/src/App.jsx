@@ -74,6 +74,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/listing/:category/:slug/:location" element={<BusinessCard />} />
         <Route path="/listing/:category/:slug" element={<BusinessCard />} />
+        <Route path="/listing/*" element={<BusinessCard />} />
         <Route path="/business/:slug" element={<OldBusinessRedirect />} />
         <Route
           path="/dashboard"

@@ -9,6 +9,7 @@ import {
   Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import { API_BASE_URL } from '../../api/config';
+import { listingUrl } from '../../utils/slugify';
 import toast from 'react-hot-toast';
 
 const ConfirmModal = ({ open, onClose, onConfirm, title, message, confirmText, confirmColor }) => {
@@ -157,7 +158,7 @@ const SuperAdminBusinessDetails = () => {
 
         {/* Actions */}
         <div className="flex flex-wrap gap-2 border-t border-slate-100 mt-4 pt-4">
-          <a href={`/listing/${(business.category || 'uncategorized').toLowerCase().replace(/\s+/g, '-')}/${business.slug}/${(business.city || 'unknown').toLowerCase().replace(/\s+/g, '-')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition text-sm font-medium">
+          <a href={listingUrl(business)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition text-sm font-medium">
             <FaEye /> View Public Card
           </a>
           <button onClick={() => setModal('suspend')} className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm font-medium ${business.isSuspended ? 'bg-green-50 text-green-600 hover:bg-green-100' : 'bg-orange-50 text-orange-600 hover:bg-orange-100'}`}>
