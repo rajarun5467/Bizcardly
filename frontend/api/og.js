@@ -50,6 +50,14 @@ function isBot(userAgent) {
   return BOT_PATTERN.test(userAgent || '');
 }
 
+function slugToTitle(slug) {
+  return String(slug || '')
+    .split('-')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
 // Fire-and-forget ping to wake the Render backend (free tier sleeps after inactivity)
 function warmBackend() {
   try {
@@ -96,7 +104,10 @@ export default async (req, res) => {
     // Wake the backend on every hit so subsequent requests are fast
     warmBackend();
 
-    const fallback = buildHtml('Bizcardly - Digital Business Card Platform', 'Create your free digital business card and share it with a unique QR code and URL', 'https://bizcardly.vercel.app' + path, '', '');
+    const fallbackName = slugToTitle(slug);
+    const fallbackTitle = fallbackName ? `${fallbackName} - Digital Business Card` : 'Bizcardly - Digital Business Card Platform';
+    const fallbackDesc = fallbackName ? `${fallbackName} - Digital Business Card powered by Bizcardly` : 'Create your free digital business card and share it with a unique QR code and URL';
+    const fallback = buildHtml(fallbackTitle, fallbackDesc, 'https://bizcardly.vercel.app' + path, fallbackName, '');
 
     // Real users get the app shell instantly — only crawlers need OG meta tags
     if (!slug || !isBot(req.headers['user-agent'])) {
